@@ -1,0 +1,73 @@
+from sqlalchemy.orm import Session
+from app import models, schemas
+from typing import Optional
+from datetime import datetime, timedelta
+
+def calculate_expiration_date(created_at: datetime, retention_period: int) -> str:
+    """Calculate expiration date by adding retention_period years to created_at"""
+    try:
+        expiration = created_at.replace(year=created_at.year + retention_period)
+    except ValueError:
+        # Handle leap year edge case (e.g., Feb 29)
+        expiration = created_at.replace(year=created_at.year + retention_period, day=28)
+    return expiration.isoformat()
+
+def create_ropa(db: Session, ropa: schemas.ROPAForm):
+    created_at = datetime.utcnow()
+    expiration_date = calculate_expiration_date(created_at, ropa.retention_period)
+    
+    db_ropa = models.ROPA(
+        purpose=ropa.purpose,
+        data_subject=ropa.data_subject,
+        data_category=ropa.data_category,
+        legal_basis=ropa.legal_basis,
+        retention_period=ropa.retention_period,
+        status=ropa.status,
+        expiration_date=expiration_date,
+        created_at=created_at
+    )
+    db.add(db_ropa)
+    db.commit()
+    db.refresh(db_ropa)
+    return db_ropa
+
+def get_ropa(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.ROPA).offset(skip).limit(limit).all()
+
+def get_ropa_by_filters(
+    db: Session,
+    legal_basis: Optional[str] = None,
+    status: Optional[str] = None,
+    retention_period: Optional[int] = None,
+    skip: int = 0,
+    limit: int = 100
+):
+    query = db.query(models.ROPA)
+    
+    if legal_basis:
+        query = query.filter(models.ROPA.legal_basis == legal_basis)
+    if status:
+        query = query.filter(models.ROPA.status == status)
+    if retention_period is not None:
+        query = query.filter(models.ROPA.retention_period < retention_period)
+    
+    return query.offset(skip).limit(limit).all()
+
+def update_ropa(db: Session, ropa_id: int, ropa: schemas.ROPAForm):
+    db_ropa = db.query(models.ROPA).filter(models.ROPA.id == ropa_id).first()
+    if db_ropa:
+        for key, value in ropa.dict().items():
+            setattr(db_ropa, key, value)
+        # Recalculate expiration_date if retention_period was updated
+        if db_ropa.created_at:
+            db_ropa.expiration_date = calculate_expiration_date(db_ropa.created_at, db_ropa.retention_period)
+        db.commit()
+        db.refresh(db_ropa)
+    return db_ropa
+
+def delete_ropa(db: Session, ropa_id: int):
+    db_ropa = db.query(models.ROPA).filter(models.ROPA.id == ropa_id).first()
+    if db_ropa:
+        db.delete(db_ropa)
+        db.commit()
+    return db_ropa
