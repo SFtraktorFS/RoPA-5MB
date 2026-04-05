@@ -1,6 +1,6 @@
 from fastapi import Depends,FastAPI
 from fastapi.responses import HTMLResponse
-from app.schemas import AppointmentForm
+from app.schemas import ROPAForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app import models, schemas, crud

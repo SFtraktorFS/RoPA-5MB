@@ -16,7 +16,7 @@ export default function CreatePage() {
   const [formData, setFormData] = useState<CreateFormData>({
     purpose: '',
     data_subject: 'พนักงาน',
-    data_category: 'ข้อมูลทั่วไป',
+    data_category: '',
     legal_basis: 'consent',
     retention_period: 1,
   });
@@ -26,7 +26,7 @@ export default function CreatePage() {
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3340';
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -49,13 +49,7 @@ export default function CreatePage() {
       const data = await response.json();
       if (response.ok && data.status === 'success') {
         setMessage('✅ บันทึกกิจกรรมเรียบร้อยแล้ว');
-        setFormData({
-          purpose: '',
-          data_subject: 'พนักงาน',
-          data_category: 'ข้อมูลทั่วไป',
-          legal_basis: 'consent',
-          retention_period: 1,
-        });
+        setTimeout(() => router.push('/'), 2000);
       } else {
         setMessage(data.message || '❌ เกิดข้อผิดพลาดขณะบันทึกข้อมูล');
       }
@@ -67,133 +61,137 @@ export default function CreatePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 md:px-8">
-      <div className="mx-auto w-full max-w-4xl space-y-6">
-        
-        {/* ── ปุ่มย้อนกลับ ── */}
-        <button 
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          ย้อนกลับ
-        </button>
-
-        <section className="rounded-[32px] border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="mb-8 border-b border-slate-100 pb-6">
-            <p className="text-sm uppercase tracking-[0.2em] text-slate-500 font-bold">New Entry</p>
-            <h1 className="mt-2 text-3xl font-bold text-slate-900">เพิ่มกิจกรรม ROPA</h1>
+    <div className="min-h-screen bg-gray-100 px-4 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-2xl">
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-md">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">เพิ่มกิจกรรมประมวลผลใหม่</h2>
+            <p className="mt-2 text-sm text-gray-600">ระบุรายละเอียดกิจกรรมเก็บรวบรวม ใช้ หรือเปิดเผยข้อมูลส่วนบุคคล</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* 1. Purpose (กรอกข้อความ) */}
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">1. ชื่อกิจกรรม (Purpose)</label>
+            {/* 1. Purpose - ชื่อกิจกรรม (text input) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">1. ชื่อกิจกรรม</label>
               <input
+                type="text"
                 name="purpose"
                 value={formData.purpose}
                 onChange={handleChange}
                 required
-                placeholder="ระบุชื่อกิจกรรม เช่น การจัดทำทะเบียนประวัติพนักงาน"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white outline-none transition"
+                placeholder="เช่น จัดทำทะเบียนพนักงาน"
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
               />
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              {/* 2. Data Subject (เลือก - Dropdown) */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">2. ประเภทเจ้าของข้อมูล</label>
-                <select
-                  name="data_subject"
-                  value={formData.data_subject}
-                  onChange={handleChange}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 font-medium focus:border-blue-500 focus:bg-white outline-none transition cursor-pointer"
-                >
-                  <option value="พนักงาน">พนักงาน</option>
-                  <option value="ลูกค้า">ลูกค้า</option>
-                  <option value="คู่ค้า">คู่ค้า</option>
-                  <option value="บุคคลภายนอก">บุคคลภายนอก</option>
-                </select>
-              </div>
+            {/* 2. Data Subject - ประเภทเจ้าของข้อมูล (dropdown) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">2. ประเภทเจ้าของข้อมูล</label>
+              <select
+                name="data_subject"
+                value={formData.data_subject}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+              >
+                <option value="พนักงาน">พนักงาน</option>
+                <option value="ลูกค้า">ลูกค้า</option>
+                <option value="คู่ค้า">คู่ค้า</option>
+                <option value="บุคคลภายนอก">บุคคลภายนอก</option>
+              </select>
+            </div>
 
-              {/* 3. Data Category (เลือก - Dropdown) */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">3. ประเภทข้อมูล</label>
-                <select
-                  name="data_category"
-                  value={formData.data_category}
-                  onChange={handleChange}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 font-medium focus:border-blue-500 focus:bg-white outline-none transition cursor-pointer"
-                >
-                  <option value="ข้อมูลทั่วไป">ข้อมูลทั่วไป (ชื่อ-สกุล, ที่อยู่)</option>
-                  <option value="ข้อมูลทางการเงิน">ข้อมูลทางการเงิน (เลขบัญชี)</option>
-                  <option value="ข้อมูลอ่อนไหว">ข้อมูลอ่อนไหว (ศาสนา, สุขภาพ)</option>
-                </select>
+            {/* 3. Data Category - ประเภทข้อมูล (textarea) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">3. ประเภทข้อมูล</label>
+              <textarea
+                name="data_category"
+                value={formData.data_category}
+                onChange={handleChange}
+                required
+                rows={4}
+                placeholder="ระบุประเภทข้อมูลที่ประมวลผล"
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+              />
+            </div>
+
+            {/* 4. Legal Basis - ฐานทางกฎหมาย (dropdown) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">4. ประเภทฐานทางกฎหมาย</label>
+              <select
+                name="legal_basis"
+                value={formData.legal_basis}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+              >
+                <option value="consent">✅ Consent (ได้รับความยินยอม)</option>
+                <option value="not_consent">❌ Not Consent (ฐานทางกฎหมายอื่น)</option>
+              </select>
+            </div>
+
+            {/* 5. Retention Period - ระยะเวลาการเก็บรักษา (number input) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">5. ระยะเวลาการสัญญา (ปี)</label>
+              <input
+                type="number"
+                name="retention_period"
+                value={formData.retention_period}
+                onChange={handleChange}
+                min={1}
+                max={99}
+                required
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+              />
+            </div>
+
+            {/* Personal Data Type Checkboxes */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-3">ประเภทข้อมูลส่วนบุคคล (เลือกได้มากกว่า 1 ข้อ)</label>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3">
+                  <input type="checkbox" defaultChecked className="w-4 h-4 rounded border-gray-300" />
+                  <span className="text-sm text-gray-700">ข้อมูลระบุตัวตน (บัตรประชาชน, ชื่อ-สกุล)</span>
+                </label>
+                <label className="flex items-center gap-3">
+                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300" />
+                  <span className="text-sm text-gray-700">ข้อมูลติดต่อ</span>
+                </label>
+                <label className="flex items-center gap-3">
+                  <input type="checkbox" className="w-4 h-4 rounded border-gray-300" />
+                  <span className="text-sm text-gray-700">ข้อมูลสุขภาพ (ความเชื่อทางศาสนา, สุขภาพ)</span>
+                </label>
               </div>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2">
-              {/* 4. Legal Basis (เลือก - Dropdown) */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">4. ฐานทางกฎหมาย</label>
-                <select
-                  name="legal_basis"
-                  value={formData.legal_basis}
-                  onChange={handleChange}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 font-bold focus:border-blue-500 focus:bg-white outline-none transition cursor-pointer"
-                >
-                  <option value="consent" className="text-emerald-600">✅ Consent (ได้รับความยินยอม)</option>
-                  <option value="not_consent" className="text-rose-600">❌ Not Consent (ฐานทางกฎหมายอื่น)</option>
-                </select>
-              </div>
-
-              {/* 5. Retention Period (กรอกตัวเลข) */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">5. ระยะเวลาเก็บรักษา (ปี)</label>
-                <input
-                  name="retention_period"
-                  type="number"
-                  min={1}
-                  max={99}
-                  value={formData.retention_period}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 focus:border-blue-500 focus:bg-white outline-none transition"
-                />
-              </div>
-            </div>
-
-            <div className="pt-6 border-t border-slate-100 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <p className="text-xs text-slate-500 font-medium italic">
-                  สถานะบันทึกอัตโนมัติ: <span className="text-emerald-600 font-bold uppercase">Active</span>
-                </p>
-              </div>
-              
+            {/* Buttons */}
+            <div className="flex gap-4 pt-6">
               <button
                 type="submit"
                 disabled={submitting}
-                className="inline-flex items-center justify-center rounded-full bg-blue-600 px-10 py-4 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 rounded-lg bg-blue-600 px-6 py-3 text-center font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
               >
-                {submitting ? 'กำลังส่งข้อมูล...' : 'บันทึกกิจกรรม ROPA'}
+                {submitting ? 'กำลังบันทึก...' : 'บันทึกกิจกรรม'}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="rounded-lg border border-gray-300 px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-50"
+              >
+                ยกเลิก
               </button>
             </div>
           </form>
 
           {message && (
-            <div className={`mt-6 rounded-2xl p-4 text-sm font-bold text-center border ${
+            <div className={`mt-6 rounded-lg p-4 text-sm font-medium text-center ${
               message.includes('✅') 
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
-                : 'bg-rose-50 text-rose-700 border-rose-100'
+                ? 'bg-green-100 text-green-800 border border-green-200' 
+                : 'bg-red-100 text-red-800 border border-red-200'
             }`}>
               {message}
             </div>
           )}
-        </section>
+        </div>
       </div>
     </div>
   );
