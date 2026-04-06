@@ -17,6 +17,12 @@ interface ROPA {
 export default function Home() {
   const [ropaRecords, setRopaRecords] = useState<ROPA[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filterValues, setFilterValues] = useState({
+    legal_basis: '',
+    status: '',
+    retention_period: '',
+  });
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3340";
 
@@ -39,6 +45,41 @@ export default function Home() {
   useEffect(() => {
     fetchRopaRecords();
   }, []);
+
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFilterValues((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleApplyFilter = async () => {
+    setShowFilterModal(false);
+    setIsLoading(true);
+
+    try {
+      const params = new URLSearchParams();
+      if (filterValues.legal_basis) params.append('legal_basis', filterValues.legal_basis);
+      if (filterValues.status) params.append('status', filterValues.status);
+      if (filterValues.retention_period) params.append('retention_period', filterValues.retention_period);
+
+      const response = await fetch(`${API_BASE}/ropa/filter?${params.toString()}`);
+      const data = await response.json();
+      if (data.status === 'success') {
+        setRopaRecords(data.data);
+      }
+    } catch (error) {
+      console.error('Error filtering ROPA records:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearFilter = async () => {
+    setFilterValues({ legal_basis: '', status: '', retention_period: '' });
+    await fetchRopaRecords();
+  };
 
   // คำนวณค่าต่างๆ (Derived State)
   const activeCount = ropaRecords.filter((r) => r.status === "active").length;
@@ -82,6 +123,13 @@ export default function Home() {
               >
                 ดูบันทึกทั้งหมด
               </a>
+              <button
+                type="button"
+                onClick={() => setShowFilterModal(true)}
+                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+              >
+                🔍 กรองข้อมูล
+              </button>
             </div>
           </div>
         </header>
@@ -100,7 +148,7 @@ export default function Home() {
         </section>
 
         {/* ── Main Content ── */}
-        <section className="grid gap-6 xl:grid-cols-[1.7fr_0.9fr]">
+        <section className="grid gap-6">
           
           {/* Table Part */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -157,26 +205,83 @@ export default function Home() {
             )}
           </div>
 
-          {/* Sidebar Part */}
-          <aside className="space-y-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-slate-500 mb-5">เมนูด่วน</p>
-              <div className="grid gap-3">
-                <QuickLink href="/create" label="+ เพิ่มข้อมูล ROPA" primary />
-                <QuickLink href="/records" label="ดูบันทึกทั้งหมด" />
-                <QuickLink href="/filter" label="กรองข้อมูล ROPA" />
-              </div>
-            </div>
+          {showFilterModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+              <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                <div className="mb-5 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900">กรองข้อมูล ROPA</h3>
+                    <p className="text-sm text-slate-500">เลือกตัวกรองแล้วกดยืนยันเพื่อดูผล</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowFilterModal(false)}
+                    className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-medium text-slate-500 mb-4">สถานะโดยรวม</p>
-              <div className="space-y-3 text-sm font-medium">
-                <StatusRow label="Active" value={activeCount} />
-                <StatusRow label="Inactive" value={ropaRecords.length - activeCount} />
-                <StatusRow label="Consent" value={consentCount} />
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">ฐานทางกฎหมาย</label>
+                    <select
+                      name="legal_basis"
+                      value={filterValues.legal_basis}
+                      onChange={handleFilterChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    >
+                      <option value="">ทั้งหมด</option>
+                      <option value="consent">Consent</option>
+                      <option value="not_consent">Not Consent</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">สถานะ</label>
+                    <select
+                      name="status"
+                      value={filterValues.status}
+                      onChange={handleFilterChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    >
+                      <option value="">ทั้งหมด</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">เวลาเก็บรักษา (ปี)</label>
+                    <input
+                      type="number"
+                      name="retention_period"
+                      value={filterValues.retention_period}
+                      onChange={handleFilterChange}
+                      min={1}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                      placeholder="เช่น 1"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={handleClearFilter}
+                    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    ล้างตัวกรอง
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleApplyFilter}
+                    className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                  >
+                    กรองข้อมูล
+                  </button>
+                </div>
               </div>
             </div>
-          </aside>
+          )}
         </section>
       </div>
     </div>
@@ -191,30 +296,6 @@ function StatCard({ title, value, desc, color = "text-slate-900" }: any) {
       <p className="text-sm font-medium text-slate-500">{title}</p>
       <p className={`mt-4 text-3xl font-semibold ${color}`}>{value}</p>
       <p className="mt-2 text-sm text-slate-600">{desc}</p>
-    </div>
-  );
-}
-
-function QuickLink({ href, label, primary = false }: any) {
-  return (
-    <a
-      href={href}
-      className={`block rounded-2xl px-4 py-4 text-sm font-semibold transition text-center ${
-        primary 
-        ? "bg-blue-600 text-white hover:bg-blue-700" 
-        : "border border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-      }`}
-    >
-      {label}
-    </a>
-  );
-}
-
-function StatusRow({ label, value }: any) {
-  return (
-    <div className="flex justify-between items-center py-1">
-      <span className="text-slate-600">{label}</span>
-      <span className="bg-slate-100 px-3 py-1 rounded-lg text-xs">{value}</span>
     </div>
   );
 }
