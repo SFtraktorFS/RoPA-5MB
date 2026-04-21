@@ -143,7 +143,7 @@ export default function Home() {
             desc="เปอร์เซ็นต์ข้อมูลที่ใช้งานอยู่"
             color="text-emerald-600"
           />
-          <StatCard title="ค่าเฉลี่ย Retention" value={`${averageRetention} วัน`} desc="ระยะเวลาเก็บข้อมูลเฉลี่ย" />
+          <StatCard title="ค่าเฉลี่ย Retention" value={`${averageRetention} ปี`} desc="ระยะเวลาเก็บข้อมูลเฉลี่ย" />
           <StatCard title="ฐานทางกฎหมาย (Consent)" value={consentCount} desc="รายการที่ใช้ความยินยอม" />
         </section>
 
@@ -196,7 +196,7 @@ export default function Home() {
                             {record.status.toUpperCase()}
                           </span>
                         </td>
-                        <td className="rounded-r-2xl px-4 py-4 text-sm">{record.retention_period} วัน</td>
+                        <td className="px-4 py-4 text-sm">{record.retention_period} ปี</td>
                       </tr>
                     ))}
                   </tbody>
@@ -250,7 +250,7 @@ export default function Home() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">เวลาเก็บรักษา (ปี)</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">เวลาเก็บรักษา(เช่น น้อยกว่า3ปี)</label>
                     <input
                       type="number"
                       name="retention_period"
