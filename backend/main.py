@@ -1,6 +1,9 @@
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
+from app.schemas import ROPAForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app import models, schemas, crud
@@ -230,6 +233,13 @@ async def handle_approval(approval_id: int, action: schemas.ApprovalAction, curr
         return {"status": "success", "message": "Approval rejected", "data": rejected_approval}
     else:
         raise HTTPException(status_code=400, detail="Invalid approval_status. Use 'approved' or 'rejected'")
+
+@app.delete("/ropa/{ropa_id}")
+async def delete_ropa_record(ropa_id: int, db: Session = Depends(get_db)):
+    deleted_record = crud.delete_ropa(db=db, ropa_id=ropa_id)
+    if not deleted_record:
+        raise HTTPException(status_code=404, detail="ROPA record not found")
+    return {"status": "success", "message": "ROPA record deleted", "data": {"id": ropa_id}}
 
 
 

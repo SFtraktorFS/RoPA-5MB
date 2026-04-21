@@ -60,6 +60,24 @@ def delete_user(db: Session, user_id: int):
         db.delete(db_user)
         db.commit()
     return db_user
+def check_and_update_expired_records(db: Session):
+    """Check for expired records and update their status to inactive"""
+    now = datetime.utcnow()
+    expired_records = db.query(models.ROPA).filter(
+        models.ROPA.status == "active",
+        models.ROPA.expiration_date.isnot(None)
+    ).all()
+    
+    for record in expired_records:
+        try:
+            expiration_dt = datetime.fromisoformat(record.expiration_date)
+            if expiration_dt < now:
+                record.status = "inactive"
+        except (ValueError, TypeError):
+            # Skip if expiration_date is invalid
+            continue
+    
+    db.commit()
 
 def create_ropa(db: Session, ropa: schemas.ROPAForm):
     created_at = datetime.utcnow()
@@ -81,6 +99,7 @@ def create_ropa(db: Session, ropa: schemas.ROPAForm):
     return db_ropa
 
 def get_ropa(db: Session, skip: int = 0, limit: int = 100):
+    check_and_update_expired_records(db)
     return db.query(models.ROPA).offset(skip).limit(limit).all()
 
 def get_ropa_by_id(db: Session, ropa_id: int):
@@ -94,6 +113,7 @@ def get_ropa_by_filters(
     skip: int = 0,
     limit: int = 100
 ):
+    check_and_update_expired_records(db)
     query = db.query(models.ROPA)
     
     if legal_basis:
