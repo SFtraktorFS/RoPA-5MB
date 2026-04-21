@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from typing import Optional
 from datetime import datetime, timedelta
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def calculate_expiration_date(created_at: datetime, retention_period: int) -> str:
     """Calculate expiration date by adding retention_period years to created_at"""
@@ -11,6 +14,52 @@ def calculate_expiration_date(created_at: datetime, retention_period: int) -> st
         # Handle leap year edge case (e.g., Feb 29)
         expiration = created_at.replace(year=created_at.year + retention_period, day=28)
     return expiration.isoformat()
+
+def get_password_hash(password: str):
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password, hashed_password)
+
+# User CRUD Operations
+def create_user(db: Session, user: schemas.UserCreate):
+    hashed_password = get_password_hash(user.password)
+    db_user = models.User(
+        username=user.username,
+        name=user.name,
+        password=hashed_password,
+        role=user.role
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
+
+def get_user_by_id(db: Session, user_id: int):
+    return db.query(models.User).filter(models.User.id == user_id).first()
+
+def get_all_users(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.User).offset(skip).limit(limit).all()
+
+def update_user(db: Session, user_id: int, user_update: schemas.UserUpdate):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user:
+        update_data = user_update.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_user, key, value)
+        db.commit()
+        db.refresh(db_user)
+    return db_user
+
+def delete_user(db: Session, user_id: int):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user:
+        db.delete(db_user)
+        db.commit()
+    return db_user
 
 def create_ropa(db: Session, ropa: schemas.ROPAForm):
     created_at = datetime.utcnow()
@@ -33,6 +82,9 @@ def create_ropa(db: Session, ropa: schemas.ROPAForm):
 
 def get_ropa(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.ROPA).offset(skip).limit(limit).all()
+
+def get_ropa_by_id(db: Session, ropa_id: int):
+    return db.query(models.ROPA).filter(models.ROPA.id == ropa_id).first()
 
 def get_ropa_by_filters(
     db: Session,

@@ -22,3 +22,46 @@ class ROPA(ROPAForm):
     
     class Config:
         orm_mode = True
+
+# User Schemas
+class UserCreate(BaseModel):
+    username: str
+    name: str
+    password: str
+    role: str
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+
+class User(BaseModel):
+    id: int
+    username: str
+    name: str
+    role: str
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    name: str
+    role: str
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+# 

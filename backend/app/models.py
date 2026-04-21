@@ -14,3 +14,13 @@ class ROPA(Base):
     status = Column(String, index=True, default="active")  # "active" or "inactive"
     expiration_date = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True)
+    name = Column(String, index=True)
+    password = Column(String)
+    role = Column(String, index=True)  # e.g., "admin", "user"
+    created_at = Column(DateTime, default=datetime.utcnow)
