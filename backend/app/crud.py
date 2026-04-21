@@ -15,6 +15,7 @@ def calculate_expiration_date(created_at: datetime, retention_period: int) -> st
         expiration = created_at.replace(year=created_at.year + retention_period, day=28)
     return expiration.isoformat()
 
+<<<<<<< HEAD
 def get_password_hash(password: str):
     return pwd_context.hash(password)
 
@@ -79,11 +80,15 @@ def check_and_update_expired_records(db: Session):
     
     db.commit()
 
+def create_ropa(db: Session, ropa: schemas.ROPAForm, user_id: Optional[int] = None):
+=======
 def create_ropa(db: Session, ropa: schemas.ROPAForm):
+>>>>>>> parent of d3de99f (ok)
     created_at = datetime.utcnow()
     expiration_date = calculate_expiration_date(created_at, ropa.retention_period)
     
     db_ropa = models.ROPA(
+        user_id=user_id,
         purpose=ropa.purpose,
         data_subject=ropa.data_subject,
         data_category=ropa.data_category,
@@ -99,11 +104,13 @@ def create_ropa(db: Session, ropa: schemas.ROPAForm):
     return db_ropa
 
 def get_ropa(db: Session, skip: int = 0, limit: int = 100):
-    check_and_update_expired_records(db)
     return db.query(models.ROPA).offset(skip).limit(limit).all()
 
 def get_ropa_by_id(db: Session, ropa_id: int):
     return db.query(models.ROPA).filter(models.ROPA.id == ropa_id).first()
+
+def get_ropa_by_user_id(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.ROPA).filter(models.ROPA.user_id == user_id).offset(skip).limit(limit).all()
 
 def get_ropa_by_filters(
     db: Session,
@@ -113,7 +120,6 @@ def get_ropa_by_filters(
     skip: int = 0,
     limit: int = 100
 ):
-    check_and_update_expired_records(db)
     query = db.query(models.ROPA)
     
     if legal_basis:
@@ -181,8 +187,8 @@ def approve_and_save_to_ropa(db: Session, approval_id: int):
         status="active"
     )
     
-    # Save to ROPA
-    saved_ropa = create_ropa(db=db, ropa=ropa_data)
+    # Save to ROPA with user_id
+    saved_ropa = create_ropa(db=db, ropa=ropa_data, user_id=db_approval.user_id)
     
     # Update approval status
     db_approval.approval_status = "approved"
@@ -198,3 +204,6 @@ def reject_approval(db: Session, approval_id: int):
         db.commit()
         db.refresh(db_approval)
     return db_approval
+
+def get_user_approvals(db: Session, user_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.Approval).filter(models.Approval.user_id == user_id).offset(skip).limit(limit).all()

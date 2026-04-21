@@ -1,9 +1,9 @@
-from fastapi import Depends, FastAPI, HTTPException, status
+<<<<<<< HEAD
+from fastapi import Depends, FastAPI, HTTPException, status, Header
+=======
+from fastapi import Depends,FastAPI
+>>>>>>> parent of d3de99f (ok)
 from fastapi.responses import HTMLResponse
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
-from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
-from app.schemas import ROPAForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app import models, schemas, crud
@@ -16,8 +16,6 @@ from typing import Optional
 SECRET_KEY = "your-secret-key-change-this-in-production"  # Change this to a secure key
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-security = HTTPBearer()
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -50,8 +48,17 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def verify_token(credentials: HTTPAuthCredentials = Depends(security)) -> str:
-    token = credentials.credentials
+def verify_token(authorization: str = Header(None)) -> str:
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing authorization header")
+    
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(status_code=401, detail="Invalid authentication scheme")
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid authorization header")
+    
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -182,6 +189,7 @@ async def filter_ropa_records(
     )
     return {"status": "success", "data": filtered_records}
 
+<<<<<<< HEAD
 @app.put("/ropa/edit/{ropa_id}", response_model=schemas.ROPA)
 async def edit_ropa_record(ropa_id: int, ropa_update: schemas.ROPAForm, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
     """Edit ROPA record"""
@@ -234,13 +242,14 @@ async def handle_approval(approval_id: int, action: schemas.ApprovalAction, curr
     else:
         raise HTTPException(status_code=400, detail="Invalid approval_status. Use 'approved' or 'rejected'")
 
-@app.delete("/ropa/{ropa_id}")
-async def delete_ropa_record(ropa_id: int, db: Session = Depends(get_db)):
-    deleted_record = crud.delete_ropa(db=db, ropa_id=ropa_id)
-    if not deleted_record:
-        raise HTTPException(status_code=404, detail="ROPA record not found")
-    return {"status": "success", "message": "ROPA record deleted", "data": {"id": ropa_id}}
+@app.get("/user/get")
+async def get_user_ropa(skip: int = 0, limit: int = 100, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Get user's own ROPA records"""
+    ropa_records = crud.get_ropa_by_user_id(db, user_id=current_user.id, skip=skip, limit=limit)
+    return {"status": "success", "data": ropa_records}
 
+=======
+>>>>>>> parent of d3de99f (ok)
 
 
 

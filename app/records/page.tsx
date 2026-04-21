@@ -40,25 +40,6 @@ export default function RecordsPage() {
     }
   };
 
-  const handleDeleteRecord = async (recordId: number) => {
-    const confirmed = window.confirm('ยืนยันการลบบันทึกนี้? การลบจะไม่สามารถกู้คืนได้');
-    if (!confirmed) return;
-
-    try {
-      const response = await fetch(`${API_BASE}/ropa/${recordId}`, {
-        method: 'DELETE',
-      });
-      const data = await response.json();
-      if (data.status === 'success') {
-        await fetchRecords();
-      } else {
-        console.error('Error deleting record:', data);
-      }
-    } catch (error) {
-      console.error('Error deleting record:', error);
-    }
-  };
-
   const exportCSV = () => {
     const headers = ['ID', 'Purpose', 'Data Subject', 'Data Category', 'Legal Basis', 'Retention Period', 'Status', 'Created At'];
     const rows = records.map(r => [
@@ -122,7 +103,6 @@ export default function RecordsPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ข้อมูลประเมินการจองทะเบียน</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ระยะเวลาการเก็บรักษา</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ประเภทข้อมูล</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">สถานะ</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ตัวเลือก</th>
                   </tr>
                 </thead>
@@ -134,21 +114,7 @@ export default function RecordsPage() {
                       <td className="px-6 py-4 text-sm text-slate-900 font-medium">{record.retention_period} ปี</td>
                       <td className="px-6 py-4 text-sm text-slate-900">{record.data_subject}</td>
                       <td className="px-6 py-4 text-sm">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          record.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {record.status === 'active' ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <button
-                          onClick={() => handleDeleteRecord(record.id)}
-                          className="text-red-600 hover:text-red-700 font-semibold"
-                        >
-                          🗑️ ลบ
-                        </button>
+                        <button className="text-red-600 hover:text-red-700 font-semibold">🗑️</button>
                       </td>
                     </tr>
                   ))}
