@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 from fastapi import Depends, FastAPI, HTTPException, status, Header
-=======
-from fastapi import Depends,FastAPI
->>>>>>> parent of d3de99f (ok)
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -189,7 +185,6 @@ async def filter_ropa_records(
     )
     return {"status": "success", "data": filtered_records}
 
-<<<<<<< HEAD
 @app.put("/ropa/edit/{ropa_id}", response_model=schemas.ROPA)
 async def edit_ropa_record(ropa_id: int, ropa_update: schemas.ROPAForm, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
     """Edit ROPA record"""
@@ -248,8 +243,6 @@ async def get_user_ropa(skip: int = 0, limit: int = 100, current_user = Depends(
     ropa_records = crud.get_ropa_by_user_id(db, user_id=current_user.id, skip=skip, limit=limit)
     return {"status": "success", "data": ropa_records}
 
-=======
->>>>>>> parent of d3de99f (ok)
 
 
 
