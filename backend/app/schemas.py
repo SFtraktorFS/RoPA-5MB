@@ -64,4 +64,29 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
-# 
+
+# Approval Schemas
+class ApprovalForm(BaseModel):
+    purpose: str
+    data_subject: str
+    data_category: str
+    legal_basis: str
+    retention_period: int
+
+class ApprovalResponse(BaseModel):
+    id: int
+    user_id: int
+    purpose: str
+    data_subject: str
+    data_category: str
+    legal_basis: str
+    retention_period: int
+    approval_status: str
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        orm_mode = True
+
+class ApprovalAction(BaseModel):
+    approval_status: str  # "approved" or "rejected"

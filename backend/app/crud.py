@@ -123,3 +123,58 @@ def delete_ropa(db: Session, ropa_id: int):
         db.delete(db_ropa)
         db.commit()
     return db_ropa
+
+# Approval CRUD Operations
+def create_approval(db: Session, user_id: int, approval: schemas.ApprovalForm):
+    db_approval = models.Approval(
+        user_id=user_id,
+        purpose=approval.purpose,
+        data_subject=approval.data_subject,
+        data_category=approval.data_category,
+        legal_basis=approval.legal_basis,
+        retention_period=approval.retention_period,
+        approval_status="pending"
+    )
+    db.add(db_approval)
+    db.commit()
+    db.refresh(db_approval)
+    return db_approval
+
+def get_pending_approvals(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Approval).filter(models.Approval.approval_status == "pending").offset(skip).limit(limit).all()
+
+def get_approval_by_id(db: Session, approval_id: int):
+    return db.query(models.Approval).filter(models.Approval.id == approval_id).first()
+
+def approve_and_save_to_ropa(db: Session, approval_id: int):
+    db_approval = db.query(models.Approval).filter(models.Approval.id == approval_id).first()
+    if not db_approval:
+        return None
+    
+    # Create ROPA record from approval
+    ropa_data = schemas.ROPAForm(
+        purpose=db_approval.purpose,
+        data_subject=db_approval.data_subject,
+        data_category=db_approval.data_category,
+        legal_basis=db_approval.legal_basis,
+        retention_period=db_approval.retention_period,
+        status="active"
+    )
+    
+    # Save to ROPA
+    saved_ropa = create_ropa(db=db, ropa=ropa_data)
+    
+    # Update approval status
+    db_approval.approval_status = "approved"
+    db.commit()
+    db.refresh(db_approval)
+    
+    return {"approval": db_approval, "ropa": saved_ropa}
+
+def reject_approval(db: Session, approval_id: int):
+    db_approval = db.query(models.Approval).filter(models.Approval.id == approval_id).first()
+    if db_approval:
+        db_approval.approval_status = "rejected"
+        db.commit()
+        db.refresh(db_approval)
+    return db_approval

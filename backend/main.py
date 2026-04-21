@@ -199,6 +199,38 @@ async def delete_ropa_record(ropa_id: int, current_user = Depends(get_current_us
     deleted_ropa = crud.delete_ropa(db=db, ropa_id=ropa_id)
     return {"status": "success", "message": "ROPA record deleted", "data": deleted_ropa}
 
+# Approval Routes
+@app.post("/user/approval", response_model=schemas.ApprovalResponse)
+async def submit_approval_request(approval_form: schemas.ApprovalForm, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+    """User submits approval request for ROPA"""
+    new_approval = crud.create_approval(db=db, user_id=current_user.id, approval=approval_form)
+    return new_approval
+
+@app.get("/admin/approval")
+async def get_pending_approvals(skip: int = 0, limit: int = 100, current_user = Depends(check_admin), db: Session = Depends(get_db)):
+    """Admin gets pending approvals"""
+    approvals = crud.get_pending_approvals(db, skip=skip, limit=limit)
+    return {"status": "success", "data": approvals}
+
+@app.post("/admin/approval/{approval_id}")
+async def handle_approval(approval_id: int, action: schemas.ApprovalAction, current_user = Depends(check_admin), db: Session = Depends(get_db)):
+    """Admin approves or rejects approval request"""
+    approval = crud.get_approval_by_id(db, approval_id=approval_id)
+    if not approval:
+        raise HTTPException(status_code=404, detail="Approval request not found")
+    
+    if approval.approval_status != "pending":
+        raise HTTPException(status_code=400, detail="Approval request already processed")
+    
+    if action.approval_status == "approved":
+        result = crud.approve_and_save_to_ropa(db=db, approval_id=approval_id)
+        return {"status": "success", "message": "Approval approved and saved to ROPA", "data": result}
+    elif action.approval_status == "rejected":
+        rejected_approval = crud.reject_approval(db=db, approval_id=approval_id)
+        return {"status": "success", "message": "Approval rejected", "data": rejected_approval}
+    else:
+        raise HTTPException(status_code=400, detail="Invalid approval_status. Use 'approved' or 'rejected'")
+
 
 
 
