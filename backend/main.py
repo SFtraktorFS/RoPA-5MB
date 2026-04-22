@@ -1,8 +1,6 @@
-from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
-from app.schemas import ROPAForm
 from fastapi import Depends, FastAPI, HTTPException, status, Header
 from fastapi.responses import HTMLResponse
+from app.schemas import ROPAForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from app import models, schemas, crud
@@ -73,11 +71,6 @@ def get_current_user(username: str = Depends(verify_token), db: Session = Depend
         raise HTTPException(status_code=401, detail="User not found")
     return user
 
-def check_admin(current_user = Depends(get_current_user)):
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized. Admin access required.")
-    return current_user
-
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     return """
@@ -116,10 +109,9 @@ async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_d
 @app.post("/admin/create", response_model=schemas.UserResponse)
 async def create_user(
     user: schemas.UserCreate,
-    current_user = Depends(check_admin),
     db: Session = Depends(get_db)
 ):
-    """Create new user (Admin only)"""
+    """Create new user"""
     existing_user = crud.get_user_by_username(db, username=user.username)
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
@@ -130,10 +122,9 @@ async def create_user(
 @app.delete("/delete/{user_id}")
 async def delete_user(
     user_id: int,
-    current_user = Depends(check_admin),
     db: Session = Depends(get_db)
 ):
-    """Delete user (Admin only)"""
+    """Delete user"""
     user = crud.get_user_by_id(db, user_id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -145,10 +136,9 @@ async def delete_user(
 async def edit_user(
     user_id: int,
     user_update: schemas.UserUpdate,
-    current_user = Depends(check_admin),
     db: Session = Depends(get_db)
 ):
-    """Edit user (Admin only)"""
+    """Edit user"""
     user = crud.get_user_by_id(db, user_id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -156,15 +146,21 @@ async def edit_user(
     updated_user = crud.update_user(db=db, user_id=user_id, user_update=user_update)
     return updated_user
 
+@app.get("/users", response_model=list[schemas.UserResponse])
+async def get_all_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    """Get all users"""
+    users = crud.get_all_users(db, skip=skip, limit=limit)
+    return users
+
 # ROPA Routes
 @app.post("/ropa")
-async def create_ropa_record(form_data: schemas.ROPAForm, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def create_ropa_record(form_data: schemas.ROPAForm, db: Session = Depends(get_db)):
     print(f"Received ROPA data: {form_data}")
     saved_data = crud.create_ropa(db=db, ropa=form_data)
     return {"status": "success", "message": "ROPA record created", "data": saved_data}
 
 @app.get("/ropa")
-async def read_ropa_records(skip: int = 0, limit: int = 100, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def read_ropa_records(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     ropa_records = crud.get_ropa(db, skip=skip, limit=limit)
     return {"status": "success", "data": ropa_records}
 
@@ -175,7 +171,6 @@ async def filter_ropa_records(
     retention_period: int = None,
     skip: int = 0,
     limit: int = 100,
-    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     filtered_records = crud.get_ropa_by_filters(
@@ -189,7 +184,7 @@ async def filter_ropa_records(
     return {"status": "success", "data": filtered_records}
 
 @app.put("/ropa/edit/{ropa_id}", response_model=schemas.ROPA)
-async def edit_ropa_record(ropa_id: int, ropa_update: schemas.ROPAForm, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def edit_ropa_record(ropa_id: int, ropa_update: schemas.ROPAForm, db: Session = Depends(get_db)):
     """Edit ROPA record"""
     ropa = crud.get_ropa_by_id(db, ropa_id=ropa_id)
     if not ropa:
@@ -199,7 +194,7 @@ async def edit_ropa_record(ropa_id: int, ropa_update: schemas.ROPAForm, current_
     return updated_ropa
 
 @app.delete("/ropa/delete/{ropa_id}")
-async def delete_ropa_record(ropa_id: int, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def delete_ropa_record(ropa_id: int, db: Session = Depends(get_db)):
     """Delete ROPA record"""
     ropa = crud.get_ropa_by_id(db, ropa_id=ropa_id)
     if not ropa:
@@ -210,19 +205,19 @@ async def delete_ropa_record(ropa_id: int, current_user = Depends(get_current_us
 
 # Approval Routes
 @app.post("/user/approval", response_model=schemas.ApprovalResponse)
-async def submit_approval_request(approval_form: schemas.ApprovalForm, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def submit_approval_request(approval_form: schemas.ApprovalForm, db: Session = Depends(get_db)):
     """User submits approval request for ROPA"""
-    new_approval = crud.create_approval(db=db, user_id=current_user.id, approval=approval_form)
+    new_approval = crud.create_approval(db=db, user_id=1, approval=approval_form)
     return new_approval
 
 @app.get("/admin/approval")
-async def get_pending_approvals(skip: int = 0, limit: int = 100, current_user = Depends(check_admin), db: Session = Depends(get_db)):
+async def get_pending_approvals(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Admin gets pending approvals"""
     approvals = crud.get_pending_approvals(db, skip=skip, limit=limit)
     return {"status": "success", "data": approvals}
 
 @app.post("/admin/approval/{approval_id}")
-async def handle_approval(approval_id: int, action: schemas.ApprovalAction, current_user = Depends(check_admin), db: Session = Depends(get_db)):
+async def handle_approval(approval_id: int, action: schemas.ApprovalAction, db: Session = Depends(get_db)):
     """Admin approves or rejects approval request"""
     approval = crud.get_approval_by_id(db, approval_id=approval_id)
     if not approval:
@@ -241,7 +236,7 @@ async def handle_approval(approval_id: int, action: schemas.ApprovalAction, curr
         raise HTTPException(status_code=400, detail="Invalid approval_status. Use 'approved' or 'rejected'")
 
 @app.get("/user/get")
-async def get_user_ropa(skip: int = 0, limit: int = 100, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_user_ropa(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get user's own ROPA records"""
     ropa_records = crud.get_ropa_by_user_id(db, user_id=current_user.id, skip=skip, limit=limit)
     return {"status": "success", "data": ropa_records}

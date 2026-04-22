@@ -5,5 +5,5 @@ python-multipart
 sqlalchemy
 databases[sqlite]
 python-jose[cryptography]
-passlib[bcrypt]
+passlib
 fastapi-cors

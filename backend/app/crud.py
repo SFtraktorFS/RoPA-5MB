@@ -4,7 +4,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 def calculate_expiration_date(created_at: datetime, retention_period: int) -> str:
     """Calculate expiration date by adding retention_period years to created_at"""
@@ -80,12 +80,11 @@ def delete_user(db: Session, user_id: int):
         db.commit()
     return db_user
 
-def create_ropa(db: Session, ropa: schemas.ROPAForm, user_id: Optional[int] = None):
+def create_ropa(db: Session, ropa: schemas.ROPAForm):
     created_at = datetime.utcnow()
     expiration_date = calculate_expiration_date(created_at, ropa.retention_period)
     
     db_ropa = models.ROPA(
-        user_id=user_id,
         purpose=ropa.purpose,
         data_subject=ropa.data_subject,
         data_category=ropa.data_category,
