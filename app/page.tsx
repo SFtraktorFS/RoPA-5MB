@@ -150,7 +150,7 @@ export default function Home() {
                 ROPA Master
               </p>
               <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-                แผงควบคุม (Dashboard)
+                ยินดีต้อนรับสู่ระบบ RoPA Master
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                 ดูภาพรวมข้อมูล ROPA ทั้งหมด พร้อมจัดการข้อมูลการประมวลผลส่วนบุคคล
