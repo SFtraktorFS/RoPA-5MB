@@ -20,6 +20,23 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+@app.on_event("startup")
+def create_default_admin():
+    db = SessionLocal()
+    try:
+        existing_admin = db.query(models.User).filter(models.User.role == "admin").first()
+        if not existing_admin:
+            admin_user = schemas.UserCreate(
+                username="admin",
+                name="Administrator",
+                password="admin123",
+                role="admin"
+            )
+            crud.create_user(db=db, user=admin_user)
+            print("Default admin created: admin / admin123")
+    finally:
+        db.close()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -96,7 +113,7 @@ async def create_data():
     return {"message": "Data received via POST method", "status": "success"}
 
 # User Authentication Routes
-@app.post("/login", response_model=schemas.Token)
+@app.post("/login")
 async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     """Login endpoint that returns JWT token"""
     user = crud.get_user_by_username(db, username=user_credentials.username)
@@ -110,7 +127,23 @@ async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_d
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"status": "success", "access_token": access_token, "token_type": "bearer", "role": user.role, "username": user.username}
+
+@app.get("/setup")
+async def setup_admin(db: Session = Depends(get_db)):
+    """Setup default admin user - call this once to create admin"""
+    existing_admin = db.query(models.User).filter(models.User.role == "admin").first()
+    if existing_admin:
+        return {"status": "exists", "message": "Admin already exists"}
+    
+    admin_user = schemas.UserCreate(
+        username="admin",
+        name="Administrator",
+        password="admin123",
+        role="admin"
+    )
+    crud.create_user(db=db, user=admin_user)
+    return {"status": "success", "message": "Admin created: admin / admin123"}
 
 # User Management Routes
 @app.post("/admin/create", response_model=schemas.UserResponse)
@@ -141,6 +174,15 @@ async def delete_user(
     deleted_user = crud.delete_user(db=db, user_id=user_id)
     return {"status": "success", "message": "User deleted", "data": deleted_user}
 
+@app.get("/admin/users")
+async def get_all_users(
+    current_user = Depends(check_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all users (Admin only)"""
+    users = crud.get_all_users(db)
+    return {"status": "success", "data": users}
+
 @app.put("/edit/{user_id}", response_model=schemas.UserResponse)
 async def edit_user(
     user_id: int,
@@ -158,13 +200,13 @@ async def edit_user(
 
 # ROPA Routes
 @app.post("/ropa")
-async def create_ropa_record(form_data: schemas.ROPAForm, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def create_ropa_record(form_data: schemas.ROPAForm, db: Session = Depends(get_db)):
     print(f"Received ROPA data: {form_data}")
     saved_data = crud.create_ropa(db=db, ropa=form_data)
     return {"status": "success", "message": "ROPA record created", "data": saved_data}
 
 @app.get("/ropa")
-async def read_ropa_records(skip: int = 0, limit: int = 100, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+async def read_ropa_records(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     ropa_records = crud.get_ropa(db, skip=skip, limit=limit)
     return {"status": "success", "data": ropa_records}
 
@@ -198,8 +240,8 @@ async def edit_ropa_record(ropa_id: int, ropa_update: schemas.ROPAForm, current_
     updated_ropa = crud.update_ropa(db=db, ropa_id=ropa_id, ropa=ropa_update)
     return updated_ropa
 
-@app.delete("/ropa/delete/{ropa_id}")
-async def delete_ropa_record(ropa_id: int, current_user = Depends(get_current_user), db: Session = Depends(get_db)):
+@app.delete("/ropa/{ropa_id}")
+async def delete_ropa_record(ropa_id: int, db: Session = Depends(get_db)):
     """Delete ROPA record"""
     ropa = crud.get_ropa_by_id(db, ropa_id=ropa_id)
     if not ropa:
