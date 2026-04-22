@@ -18,6 +18,23 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+@app.on_event("startup")
+def create_default_admin():
+    db = SessionLocal()
+    try:
+        existing_admin = db.query(models.User).filter(models.User.username == "adminOwen").first()
+        if not existing_admin:
+            admin_user = schemas.UserCreate(
+                username="adminOwen",
+                name="Admin Owen",
+                password="Owen123",
+                role="admin"
+            )
+            crud.create_user(db=db, user=admin_user)
+            print("Default admin created: adminOwen / Owen123")
+    finally:
+        db.close()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -89,7 +106,7 @@ async def create_data():
     return {"message": "Data received via POST method", "status": "success"}
 
 # User Authentication Routes
-@app.post("/login", response_model=schemas.Token)
+@app.post("/login")
 async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
     """Login endpoint that returns JWT token"""
     user = crud.get_user_by_username(db, username=user_credentials.username)
@@ -103,7 +120,23 @@ async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_d
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"status": "success", "access_token": access_token, "token_type": "bearer", "role": user.role, "username": user.username}
+
+@app.get("/setup")
+async def setup_admin(db: Session = Depends(get_db)):
+    """Setup default admin user - call this once to create admin"""
+    existing_admin = db.query(models.User).filter(models.User.username == "adminOwen").first()
+    if existing_admin:
+        return {"status": "exists", "message": "Admin already exists"}
+    
+    admin_user = schemas.UserCreate(
+        username="adminOwen",
+        name="Admin Owen",
+        password="Owen123",
+        role="admin"
+    )
+    crud.create_user(db=db, user=admin_user)
+    return {"status": "success", "message": "Admin created: adminOwen / Owen123"}
 
 # User Management Routes
 @app.post("/admin/create", response_model=schemas.UserResponse)
@@ -131,6 +164,15 @@ async def delete_user(
     
     deleted_user = crud.delete_user(db=db, user_id=user_id)
     return {"status": "success", "message": "User deleted", "data": deleted_user}
+
+@app.get("/admin/users")
+async def get_all_users(
+    current_user = Depends(check_admin),
+    db: Session = Depends(get_db)
+):
+    """Get all users (Admin only)"""
+    users = crud.get_all_users(db)
+    return {"status": "success", "data": users}
 
 @app.put("/edit/{user_id}", response_model=schemas.UserResponse)
 async def edit_user(
