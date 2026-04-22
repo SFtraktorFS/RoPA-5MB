@@ -30,8 +30,11 @@ export default function LoginPage() {
       if (response.ok && data.status === 'success') {
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('username', data.username || username);
-        localStorage.setItem('role', data.role || 'user');
-        if (data.role === 'admin') {
+        
+        const userRole = data.role?.toLowerCase() || 'user';
+        localStorage.setItem('role', userRole);
+        
+        if (userRole === 'admin') {
           router.push('/admin');
         } else {
           router.push('/user');
@@ -42,7 +45,7 @@ export default function LoginPage() {
           const setupRes = await fetch(`${API_BASE}/setup`);
           const setupData = await setupRes.json();
           if (setupData.status === 'success' || setupData.status === 'exists') {
-            setError('ระบบได้สร้าง admin ใหม่ กรุณาล็อกอินอีกครั้ง: admin / admin123');
+            setError('ระบบได้สร้าง admin ใหม่ กรุณาล็อกอินอีกครั้ง: adminOwen / Owen123');
           }
         }
       }

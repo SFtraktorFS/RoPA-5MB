@@ -30,7 +30,7 @@ export default function AdminPage() {
   const fetchRopaRecords = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_BASE}/ropa`);
+      const response = await fetch(`${API_BASE}/admin/ropa`);
       const data = await response.json();
       if (data.status === 'success') {
         setRopaRecords(data.data);
@@ -64,7 +64,7 @@ export default function AdminPage() {
       if (filterValues.status) params.append('status', filterValues.status);
       if (filterValues.retention_period) params.append('retention_period', filterValues.retention_period);
 
-      const response = await fetch(`${API_BASE}/ropa/filter?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/admin/ropa/filter?${params.toString()}`);
       const data = await response.json();
       if (data.status === 'success') {
         setRopaRecords(data.data);

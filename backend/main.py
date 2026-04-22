@@ -24,16 +24,16 @@ app = FastAPI()
 def create_default_admin():
     db = SessionLocal()
     try:
-        existing_admin = db.query(models.User).filter(models.User.role == "admin").first()
+        existing_admin = db.query(models.User).filter(models.User.username == "adminOwen").first()
         if not existing_admin:
             admin_user = schemas.UserCreate(
-                username="admin",
-                name="Administrator",
-                password="admin123",
+                username="adminOwen",
+                name="Admin Owen",
+                password="Owen123",
                 role="admin"
             )
             crud.create_user(db=db, user=admin_user)
-            print("Default admin created: admin / admin123")
+            print("Default admin created: adminOwen / Owen123")
     finally:
         db.close()
 
@@ -132,18 +132,18 @@ async def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_d
 @app.get("/setup")
 async def setup_admin(db: Session = Depends(get_db)):
     """Setup default admin user - call this once to create admin"""
-    existing_admin = db.query(models.User).filter(models.User.role == "admin").first()
+    existing_admin = db.query(models.User).filter(models.User.username == "adminOwen").first()
     if existing_admin:
         return {"status": "exists", "message": "Admin already exists"}
     
     admin_user = schemas.UserCreate(
-        username="admin",
-        name="Administrator",
-        password="admin123",
+        username="adminOwen",
+        name="Admin Owen",
+        password="Owen123",
         role="admin"
     )
     crud.create_user(db=db, user=admin_user)
-    return {"status": "success", "message": "Admin created: admin / admin123"}
+    return {"status": "success", "message": "Admin created: adminOwen / Owen123"}
 
 # User Management Routes
 @app.post("/admin/create", response_model=schemas.UserResponse)

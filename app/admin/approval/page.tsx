@@ -14,10 +14,47 @@ interface Approval {
   created_at: string;
 }
 
+const DEMO_APPROVALS: Approval[] = [
+  {
+    id: 1,
+    user_id: 1,
+    purpose: 'การประมวลผลข้อมูลสำหรับการตลาด',
+    data_subject: 'ลูกค้าปัจจุบัน',
+    data_category: 'ข้อมูลส่วนตัว',
+    legal_basis: 'ความตกลง',
+    retention_period: 3,
+    approval_status: 'pending',
+    created_at: '2024-04-01'
+  },
+  {
+    id: 2,
+    user_id: 2,
+    purpose: 'การวิเคราะห์พฤติกรรมผู้ใช้งาน',
+    data_subject: 'ผู้ใช้งานเว็บไซต์',
+    data_category: 'ข้อมูลการใช้งาน',
+    legal_basis: '↓↓ness Interest',
+    retention_period: 2,
+    approval_status: 'approved',
+    created_at: '2024-03-15'
+  },
+  {
+    id: 3,
+    user_id: 3,
+    purpose: 'การส่งสื่อ Sanders',
+    data_subject: 'عضو club',
+    data_category: 'ผู้ùng完整Free',
+    legal_basis: 'ความยินยอม',
+    retention_period: 1,
+    approval_status: 'pending',
+    created_at: '2024-04-10'
+  },
+];
+
 export default function ApprovalPage() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState('');
+  const [isDemo, setIsDemo] = useState(false);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3340';
 
@@ -36,9 +73,14 @@ export default function ApprovalPage() {
       if (res.ok) {
         const data = await res.json();
         setApprovals(data.data || []);
+        setIsDemo(false);
+      } else {
+        setIsDemo(true);
+        setApprovals([...DEMO_APPROVALS]);
       }
     } catch (error) {
-      console.error('Error fetching approvals:', error);
+      setIsDemo(true);
+      setApprovals([...DEMO_APPROVALS]);
     } finally {
       setLoading(false);
     }
@@ -46,7 +88,15 @@ export default function ApprovalPage() {
 
   const handleApproval = async (approvalId: number, status: 'approved' | 'rejected') => {
     if (!confirm(`ยืนยัน${status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}?`)) return;
-    
+
+    if (isDemo) {
+      setApprovals(approvals.map(a =>
+        a.id === approvalId ? { ...a, approval_status: status } : a
+      ));
+      alert(`${status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}สำเร็จ (DEMO)`);
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/admin/approval/${approvalId}`, {
         method: 'POST',
@@ -56,7 +106,7 @@ export default function ApprovalPage() {
         },
         body: JSON.stringify({ approval_status: status })
       });
-      
+
       if (res.ok) {
         alert(`${status === 'approved' ? 'อนุมัติ' : 'ปฏิเสธ'}สำเร็จ`);
         fetchApprovals();
@@ -85,9 +135,16 @@ export default function ApprovalPage() {
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-8">
       <div className="mx-auto max-w-6xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">อนุมัติข้อมูล</h1>
-          <p className="text-sm text-slate-600">ตรวจสอบและอนุมัติคำขอ ROPA</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">อนุมัติข้อมูล</h1>
+            <p className="text-sm text-slate-600">ตรวจสอบและอนุมัติคำขอ ROPA</p>
+            {isDemo && (
+              <span className="mt-2 inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-black">
+                โหมด DEMO - ข้อมูลไม่ถูกบันทึกลงฐานข้อมูล
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
