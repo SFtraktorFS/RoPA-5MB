@@ -164,7 +164,7 @@ export default function Home() {
                 + เพิ่มข้อมูลใหม่
               </a>
               <a
-                href="/records"
+                href="/ropa"
                 className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
               >
                 ดูบันทึกทั้งหมด
