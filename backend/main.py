@@ -81,6 +81,13 @@ async def delete_ropa_record(ropa_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="ROPA record not found")
     return {"status": "success", "message": "ROPA record deleted", "data": {"id": ropa_id}}
 
+@app.put("/ropa/{ropa_id}")
+async def update_ropa_record(ropa_id: int, form_data: schemas.ROPAForm, db: Session = Depends(get_db)):
+    updated_record = crud.update_ropa(db=db, ropa_id=ropa_id, ropa=form_data)
+    if not updated_record:
+        raise HTTPException(status_code=404, detail="ROPA record not found")
+    return {"status": "success", "message": "ROPA record updated", "data": updated_record}
+
 
 
 

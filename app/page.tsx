@@ -18,6 +18,16 @@ export default function Home() {
   const [ropaRecords, setRopaRecords] = useState<ROPA[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<ROPA | null>(null);
+  const [editForm, setEditForm] = useState({
+    purpose: '',
+    data_subject: '',
+    data_category: '',
+    legal_basis: '',
+    retention_period: 0,
+    status: '',
+  });
   const [filterValues, setFilterValues] = useState({
     legal_basis: '',
     status: '',
@@ -79,6 +89,42 @@ export default function Home() {
   const handleClearFilter = async () => {
     setFilterValues({ legal_basis: '', status: '', retention_period: '' });
     await fetchRopaRecords();
+  };
+
+  const handleEditClick = (record: ROPA) => {
+    setSelectedRecord(record);
+    setEditForm({
+      purpose: record.purpose,
+      data_subject: record.data_subject,
+      data_category: record.data_category,
+      legal_basis: record.legal_basis,
+      retention_period: record.retention_period,
+      status: record.status,
+    });
+    setShowEditModal(true);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditForm((prev) => ({ ...prev, [name]: name === 'retention_period' ? parseInt(value) || 0 : value }));
+  };
+
+  const handleEditSubmit = async () => {
+    if (!selectedRecord) return;
+    try {
+      const response = await fetch(`${API_BASE}/ropa/${selectedRecord.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      const data = await response.json();
+      if (data.status === 'success') {
+        setShowEditModal(false);
+        await fetchRopaRecords();
+      }
+    } catch (error) {
+      console.error('Error updating ROPA record:', error);
+    }
   };
 
   // คำนวณค่าต่างๆ (Derived State)
@@ -178,6 +224,7 @@ export default function Home() {
                       <th className="px-4 py-3">Legal Basis</th>
                       <th className="px-4 py-3">Status</th>
                       <th className="px-4 py-3">Retention</th>
+                      <th className="px-4 py-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -197,6 +244,14 @@ export default function Home() {
                           </span>
                         </td>
                         <td className="px-4 py-4 text-sm">{record.retention_period} ปี</td>
+                        <td className="rounded-r-2xl px-4 py-4 text-sm">
+                          <button
+                            onClick={() => handleEditClick(record)}
+                            className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-200"
+                          >
+                            แก้ไข
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -277,6 +332,115 @@ export default function Home() {
                     className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
                   >
                     กรองข้อมูล
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showEditModal && selectedRecord && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+              <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+                <div className="mb-5 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900">แก้ไขข้อมูล ROPA</h3>
+                    <p className="text-sm text-slate-500">ID: {selectedRecord.id}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="grid gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Purpose</label>
+                    <input
+                      type="text"
+                      name="purpose"
+                      value={editForm.purpose}
+                      onChange={handleEditChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Data Subject</label>
+                    <input
+                      type="text"
+                      name="data_subject"
+                      value={editForm.data_subject}
+                      onChange={handleEditChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Legal Basis</label>
+                      <select
+                        name="legal_basis"
+                        value={editForm.legal_basis}
+                        onChange={handleEditChange}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                      >
+                        <option value="consent">Consent</option>
+                        <option value="not_consent">Not Consent</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                      <select
+                        name="status"
+                        value={editForm.status}
+                        onChange={handleEditChange}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Retention Period (Years)</label>
+                      <input
+                        type="number"
+                        name="retention_period"
+                        value={editForm.retention_period}
+                        onChange={handleEditChange}
+                        min={1}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Data Category</label>
+                      <input
+                        type="text"
+                        name="data_category"
+                        value={editForm.data_category}
+                        onChange={handleEditChange}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleEditSubmit}
+                    className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                  >
+                    บันทึกการแก้ไข
                   </button>
                 </div>
               </div>
