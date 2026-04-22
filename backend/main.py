@@ -1,4 +1,4 @@
-from fastapi import Depends,FastAPI
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from app.schemas import ROPAForm
 from fastapi.middleware.cors import CORSMiddleware
@@ -73,6 +73,13 @@ async def filter_ropa_records(
         limit=limit
     )
     return {"status": "success", "data": filtered_records}
+
+@app.delete("/ropa/{ropa_id}")
+async def delete_ropa_record(ropa_id: int, db: Session = Depends(get_db)):
+    deleted_record = crud.delete_ropa(db=db, ropa_id=ropa_id)
+    if not deleted_record:
+        raise HTTPException(status_code=404, detail="ROPA record not found")
+    return {"status": "success", "message": "ROPA record deleted", "data": {"id": ropa_id}}
 
 
 

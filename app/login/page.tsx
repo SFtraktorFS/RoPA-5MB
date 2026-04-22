@@ -1,51 +1,30 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-export default function Home() {
+export default function Login() {
   const router = useRouter();
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const storedUsers = localStorage.getItem("ropa_users");
-    if (!storedUsers) {
-      const defaultUsers = [
-        { username: "admin", password: "admin123", createdAt: new Date().toISOString() }
-      ];
-      localStorage.setItem("ropa_users", JSON.stringify(defaultUsers));
-    }
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
-    if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password");
+    if (!username.trim()) {
+      setError("Please enter your username");
       return;
     }
 
     setIsLoading(true);
-    
+    // Simulate login delay
     setTimeout(() => {
-      const storedUsers = localStorage.getItem("ropa_users");
-      const users = storedUsers ? JSON.parse(storedUsers) : [];
-      
-      const user = users.find((u: any) => u.username === username && u.password === password);
-      
-      if (user) {
-        sessionStorage.setItem("currentUser", username);
-        setIsLoading(false);
-        router.push("/roles");
-      } else {
-        setError("Invalid username or password");
-        setPassword("");
-        setIsLoading(false);
-      }
+      // Store username in sessionStorage for role selection
+      sessionStorage.setItem("currentUser", username);
+      setIsLoading(false);
+      router.push("/roles");
     }, 800);
   };
 
@@ -66,8 +45,8 @@ export default function Home() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-4">
               <span className="text-2xl">🔐</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to RoPA</h1>
-            <p className="text-gray-600">Record of Processing Activities</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-600">RoPA - Record of Processing Activities</p>
           </div>
 
           {/* Error Message */}
@@ -78,7 +57,7 @@ export default function Home() {
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} className="space-y-6">
             {/* Username Field */}
             <div>
               <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -90,24 +69,7 @@ export default function Home() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
-                disabled={isLoading}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all disabled:opacity-50"
-              />
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                disabled={isLoading}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all disabled:opacity-50"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
               />
             </div>
 
@@ -123,19 +85,14 @@ export default function Home() {
                   Logging in...
                 </>
               ) : (
-                <>Login</>
+                <>Continue to System</>
               )}
             </button>
           </form>
 
-          {/* Help Text */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
-              Secure access to your organization's data management system
-            </p>
-            <p className="text-xs text-gray-400 text-center mt-2">
-              Default credentials: username: <span className="font-mono">admin</span> | password: <span className="font-mono">admin123</span>
-            </p>
+          {/* Footer */}
+          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+            <p className="text-xs text-gray-500">Secure access to your organization's data management system</p>
           </div>
         </div>
       </div>
