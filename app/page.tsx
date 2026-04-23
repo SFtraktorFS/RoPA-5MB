@@ -17,7 +17,6 @@ interface ROPA {
 export default function Home() {
   const [ropaRecords, setRopaRecords] = useState<ROPA[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showFilterModal, setShowFilterModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<ROPA | null>(null);
   const [editForm, setEditForm] = useState({
@@ -28,11 +27,7 @@ export default function Home() {
     retention_period: 0,
     status: '',
   });
-  const [filterValues, setFilterValues] = useState({
-    legal_basis: '',
-    status: '',
-    retention_period: '',
-  });
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3340";
 
@@ -56,77 +51,6 @@ export default function Home() {
     fetchRopaRecords();
   }, []);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilterValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleApplyFilter = async () => {
-    setShowFilterModal(false);
-    setIsLoading(true);
-
-    try {
-      const params = new URLSearchParams();
-      if (filterValues.legal_basis) params.append('legal_basis', filterValues.legal_basis);
-      if (filterValues.status) params.append('status', filterValues.status);
-      if (filterValues.retention_period) params.append('retention_period', filterValues.retention_period);
-
-      const response = await fetch(`${API_BASE}/ropa/filter?${params.toString()}`);
-      const data = await response.json();
-      if (data.status === 'success') {
-        setRopaRecords(data.data);
-      }
-    } catch (error) {
-      console.error('Error filtering ROPA records:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClearFilter = async () => {
-    setFilterValues({ legal_basis: '', status: '', retention_period: '' });
-    await fetchRopaRecords();
-  };
-
-  const handleEditClick = (record: ROPA) => {
-    setSelectedRecord(record);
-    setEditForm({
-      purpose: record.purpose,
-      data_subject: record.data_subject,
-      data_category: record.data_category,
-      legal_basis: record.legal_basis,
-      retention_period: record.retention_period,
-      status: record.status,
-    });
-    setShowEditModal(true);
-  };
-
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setEditForm((prev) => ({ ...prev, [name]: name === 'retention_period' ? parseInt(value) || 0 : value }));
-  };
-
-  const handleEditSubmit = async () => {
-    if (!selectedRecord) return;
-    try {
-      const response = await fetch(`${API_BASE}/ropa/${selectedRecord.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editForm),
-      });
-      const data = await response.json();
-      if (data.status === 'success') {
-        setShowEditModal(false);
-        await fetchRopaRecords();
-      }
-    } catch (error) {
-      console.error('Error updating ROPA record:', error);
-    }
-  };
-
   // คำนวณค่าต่างๆ (Derived State)
   const activeCount = ropaRecords.filter((r) => r.status === "active").length;
   const consentCount = ropaRecords.filter((r) => r.legal_basis === "consent").length;
@@ -138,66 +62,97 @@ export default function Home() {
         )
       : 0;
 
-return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 md:p-8 text-slate-900">
-      <div className="mx-auto max-w-7xl space-y-8">
-        
-        {/* ── Hero Section ── */}
-        <header className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl p-8 shadow-xl shadow-blue-900/5">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl" />
-          
-          <div className="relative gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                <p className="text-xs font-medium uppercase tracking-wider text-blue-700">RoPA Master</p>
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-900">
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-sky-100/60 to-indigo-100/60" />
+      <button
+        type="button"
+        onClick={() => setIsSidebarOpen(true)}
+        className="fixed left-6 top-6 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-900 shadow-lg shadow-slate-200 transition hover:bg-white"
+        aria-label="เปิดเมนู"
+      >
+        <span className="flex h-6 w-6 flex-col justify-between">
+          <span className="block h-0.5 w-5 rounded-full bg-slate-900"></span>
+          <span className="block h-0.5 w-5 rounded-full bg-slate-900"></span>
+          <span className="block h-0.5 w-5 rounded-full bg-slate-900"></span>
+        </span>
+      </button>
+
+      <div className={`fixed inset-0 z-40 bg-slate-900/40 transition-opacity ${isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => setIsSidebarOpen(false)} />
+      <aside className={`fixed inset-y-0 left-0 z-50 w-80 max-w-full overflow-hidden bg-white/95 shadow-2xl transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+          <h2 className="text-lg font-semibold text-slate-900">เมนูหลัก</h2>
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(false)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200"
+            aria-label="ปิดเมนู"
+          >
+            ×
+          </button>
+        </div>
+        <div className="px-6 py-6 space-y-3">
+          <a href="/" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            หน้าแรก
+          </a>
+          <a href="/create" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            เพิ่มข้อมูลใหม่
+          </a>
+          <a href="/ropa" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            ดูบันทึกทั้งหมด
+          </a>
+          <a href="/dashboard" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            ดู Dashboard
+          </a>
+        </div>
+      </aside>
+
+      <main className="relative mx-auto flex min-h-screen items-center justify-center px-6 py-8">
+        <div className="w-full max-w-4xl rounded-[2.5rem] border border-white/70 bg-white/90 p-10 shadow-2xl shadow-slate-200/70 backdrop-blur-xl">
+          <div className="grid gap-10">
+            <div className="space-y-5 text-center">
+              <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-700 shadow-sm shadow-blue-100">
+                <span className="text-2xl font-bold">R</span>
               </div>
-              <h1 className="mt-4 text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                ยินดีต้อนรับสู่ระบบ
-              </h1>
-              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                RoPA Master
-              </h1>
-              <p className="mt-4 max-w-xl text-base leading-relaxed text-slate-600">
-                จัดการข้อมูลการประมวลผลส่วนบุคคล (ROPA) ขององค์กรคุณอย่างมีประสิทธิภาพ
-              </p>
+              <div>
+                <h1 className="text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
+                  RoPA Master
+                </h1>
+                <p className="mt-4 text-lg leading-8 text-slate-600">
+                  หน้าหลักที่จัดวางสวยงามและใช้ปุ่มนำทางจากซ้ายเพื่อไปยังหน้าต่าง ๆ ได้ทันที
+                </p>
+              </div>
             </div>
-            <div className="flex flex-row gap-3">
-              <a
-                href="/create"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-0.5"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center shadow-sm">
+                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Total</p>
+                <p className="mt-4 text-3xl font-semibold text-slate-900">{ropaRecords.length}</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center shadow-sm">
+                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Active</p>
+                <p className="mt-4 text-3xl font-semibold text-slate-900">{activeCount}</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-center shadow-sm">
+                <p className="text-sm uppercase tracking-[0.24em] text-slate-500">Consent</p>
+                <p className="mt-4 text-3xl font-semibold text-slate-900">{consentCount}</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <a href="/create" className="rounded-3xl bg-blue-600 px-5 py-4 text-center text-sm font-semibold text-white transition hover:bg-blue-700">
                 เพิ่มข้อมูลใหม่
               </a>
-              <a
-                href="/ropa"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-6 py-4 text-sm font-semibold text-slate-700 shadow-md transition-all hover:bg-white hover:shadow-lg hover:-translate-y-0.5"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              <a href="/ropa" className="rounded-3xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-50">
                 ดูบันทึกทั้งหมด
               </a>
-              <a
-                href="/dashboard"
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-6 py-4 text-sm font-semibold text-slate-700 shadow-md transition-all hover:bg-white hover:shadow-lg hover:-translate-y-0.5"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+              <a href="/dashboard" className="rounded-3xl border border-slate-200 bg-white px-5 py-4 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-50">
                 ดู Dashboard
               </a>
             </div>
           </div>
-        </header>
-
-        
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

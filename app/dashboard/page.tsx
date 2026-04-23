@@ -17,6 +17,7 @@ interface ROPA {
 export default function Dashboard() {
   const [ropaRecords, setRopaRecords] = useState<ROPA[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3340";
 
@@ -63,6 +64,47 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6 md:p-8 text-slate-900">
       <div className="mx-auto max-w-7xl space-y-8">
+        <button
+        type="button"
+        onClick={() => setIsSidebarOpen(true)}
+        className="fixed left-6 top-6 z-50 inline-flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-900 shadow-lg shadow-slate-200 transition hover:bg-white"
+        aria-label="เปิดเมนู"
+      >
+        <span className="flex h-6 w-6 flex-col justify-between">
+          <span className="block h-0.5 w-5 rounded-full bg-slate-900"></span>
+          <span className="block h-0.5 w-5 rounded-full bg-slate-900"></span>
+          <span className="block h-0.5 w-5 rounded-full bg-slate-900"></span>
+        </span>
+      </button>
+
+      <div className={`fixed inset-0 z-40 bg-slate-900/40 transition-opacity ${isSidebarOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => setIsSidebarOpen(false)} />
+      <aside className={`fixed inset-y-0 left-0 z-50 w-80 max-w-full overflow-hidden bg-white/95 shadow-2xl transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+          <h2 className="text-lg font-semibold text-slate-900">เมนูหลัก</h2>
+          <button
+            type="button"
+            onClick={() => setIsSidebarOpen(false)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200"
+            aria-label="ปิดเมนู"
+          >
+            ×
+          </button>
+        </div>
+        <div className="px-6 py-6 space-y-3">
+          <a href="/" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            หน้าแรก
+          </a>
+          <a href="/create" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            เพิ่มข้อมูลใหม่
+          </a>
+          <a href="/ropa" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            ดูบันทึกทั้งหมด
+          </a>
+          <a href="/dashboard" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+            ดู Dashboard
+          </a>
+        </div>
+      </aside>
         
         {/* ── Header ── */}
         <header className="relative overflow-hidden rounded-3xl border border-white/60 bg-white/80 backdrop-blur-xl p-8 shadow-xl shadow-blue-900/5">
