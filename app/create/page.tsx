@@ -49,7 +49,7 @@ export default function CreatePage() {
       const data = await response.json();
       if (response.ok && data.status === 'success') {
         setMessage('✅ บันทึกกิจกรรมเรียบร้อยแล้ว');
-        setTimeout(() => router.push('/'), 2000);
+        setTimeout(() => router.push('/ropa'), 2000);
       } else {
         setMessage(data.message || '❌ เกิดข้อผิดพลาดขณะบันทึกข้อมูล');
       }
@@ -69,7 +69,7 @@ export default function CreatePage() {
             <p className="mt-2 text-sm text-gray-600">ระบุรายละเอียดกิจกรรมเก็บรวบรวม ใช้ หรือเปิดเผยข้อมูลส่วนบุคคล</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 text-gray-700">
             
             {/* 1. Purpose - ชื่อกิจกรรม (text input) */}
             <div>

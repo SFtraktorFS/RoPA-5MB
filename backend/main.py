@@ -243,6 +243,13 @@ async def get_user_ropa(skip: int = 0, limit: int = 100, current_user = Depends(
     ropa_records = crud.get_ropa_by_user_id(db, user_id=current_user.id, skip=skip, limit=limit)
     return {"status": "success", "data": ropa_records}
 
+@app.put("/ropa/{ropa_id}")
+async def update_ropa_record(ropa_id: int, form_data: schemas.ROPAForm, db: Session = Depends(get_db)):
+    updated_record = crud.update_ropa(db=db, ropa_id=ropa_id, ropa=form_data)
+    if not updated_record:
+        raise HTTPException(status_code=404, detail="ROPA record not found")
+    return {"status": "success", "message": "ROPA record updated", "data": updated_record}
+
 
 
 

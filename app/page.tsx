@@ -1,301 +1,124 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-interface ROPA {
-  id: number;
-  purpose: string;
-  data_subject: string;
-  data_category: string;
-  legal_basis: string;
-  retention_period: number;
-  status: string;
-  expiration_date?: string;
-  created_at: string;
-}
+export default function LoginPage() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
 
-export default function Home() {
-  const [ropaRecords, setRopaRecords] = useState<ROPA[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [filterValues, setFilterValues] = useState({
-    legal_basis: '',
-    status: '',
-    retention_period: '',
-  });
-
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3340";
-
-  // ฟังก์ชันดึงข้อมูล
-  const fetchRopaRecords = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_BASE}/ropa`); // แก้ไข: ใส่ backtick
-      const data = await response.json();
-      if (data.status === "success") {
-        setRopaRecords(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching ROPA records:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRopaRecords();
-  }, []);
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFilterValues((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleApplyFilter = async () => {
-    setShowFilterModal(false);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    try {
-      const params = new URLSearchParams();
-      if (filterValues.legal_basis) params.append('legal_basis', filterValues.legal_basis);
-      if (filterValues.status) params.append('status', filterValues.status);
-      if (filterValues.retention_period) params.append('retention_period', filterValues.retention_period);
-
-      const response = await fetch(`${API_BASE}/ropa/filter?${params.toString()}`);
-      const data = await response.json();
-      if (data.status === 'success') {
-        setRopaRecords(data.data);
-      }
-    } catch (error) {
-      console.error('Error filtering ROPA records:', error);
-    } finally {
+    // Simple validation check - in production, verify with backend
+    if (!username.trim() || !password.trim()) {
+      setError("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
       setIsLoading(false);
+      return;
     }
-  };
 
-  const handleClearFilter = async () => {
-    setFilterValues({ legal_basis: '', status: '', retention_period: '' });
-    await fetchRopaRecords();
-  };
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-  // คำนวณค่าต่างๆ (Derived State)
-  const activeCount = ropaRecords.filter((r) => r.status === "active").length;
-  const consentCount = ropaRecords.filter((r) => r.legal_basis === "consent").length;
-  const averageRetention =
-    ropaRecords.length > 0
-      ? Math.round(
-          ropaRecords.reduce((sum, r) => sum + r.retention_period, 0) /
-            ropaRecords.length
-        )
-      : 0;
+    // For demo purposes: any non-empty credentials work
+    // In production, this would call an authentication API
+    setIsLoading(false);
+    router.push("/main");
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8 text-slate-900">
-      <div className="mx-auto max-w-7xl space-y-8">
-        
-        {/* ── Header ── */}
-        <header className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
-                ROPA Master
-              </p>
-              <h1 className="mt-2 text-3xl font-semibold text-slate-900">
-                แผงควบคุม (Dashboard)
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                ดูภาพรวมข้อมูล ROPA ทั้งหมด พร้อมจัดการข้อมูลการประมวลผลส่วนบุคคล
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-400/5 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative w-full max-w-md">
+        {/* Login Card */}
+        <div className="relative rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl p-8 shadow-2xl">
+          {/* Logo/Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 mb-4 shadow-lg">
+              <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <a
-                href="/create"
-                className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-              >
-                + เพิ่มข้อมูลใหม่
-              </a>
-              <a
-                href="/records"
-                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
-              >
-                ดูบันทึกทั้งหมด
-              </a>
-              <button
-                type="button"
-                onClick={() => setShowFilterModal(true)}
-                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
-              >
-                🔍 กรองข้อมูล
-              </button>
-            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">RoPA Master</h1>
+            <p className="text-sm text-blue-200">ระบบจัดการข้อมูลการประมวลผลส่วนบุคคล</p>
           </div>
-        </header>
 
-        {/* ── Stats Section ── */}
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard title="กิจกรรมทั้งหมด" value={ropaRecords.length} desc="จำนวน Record ทั้งหมด" />
-          <StatCard 
-            title="สถานะ Active" 
-            value={`${ropaRecords.length === 0 ? 0 : Math.round((activeCount / ropaRecords.length) * 100)}%`} 
-            desc="เปอร์เซ็นต์ข้อมูลที่ใช้งานอยู่"
-            color="text-emerald-600"
-          />
-          <StatCard title="ค่าเฉลี่ย Retention" value={`${averageRetention} วัน`} desc="ระยะเวลาเก็บข้อมูลเฉลี่ย" />
-          <StatCard title="ฐานทางกฎหมาย (Consent)" value={consentCount} desc="รายการที่ใช้ความยินยอม" />
-        </section>
-
-        {/* ── Main Content ── */}
-        <section className="grid gap-6">
-          
-          {/* Table Part */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-slate-900">รายการล่าสุด</h2>
-              <button
-                onClick={fetchRopaRecords}
-                className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
-              >
-                รีเฟรช
-              </button>
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-blue-100 mb-2">
+                ชื่อผู้ใช้
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-blue-300/50 backdrop-blur-sm transition-all focus:border-blue-400 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                placeholder="กรอกชื่อผู้ใช้"
+                disabled={isLoading}
+              />
             </div>
 
-            {isLoading ? (
-              <div className="py-20 text-center text-slate-400">กำลังโหลดข้อมูล...</div>
-            ) : ropaRecords.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-500">
-                ยังไม่มีบันทึก ROPA
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-separate border-spacing-y-3 text-left">
-                  <thead>
-                    <tr className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      <th className="px-4 py-3">ID</th>
-                      <th className="px-4 py-3">Purpose</th>
-                      <th className="px-4 py-3">Legal Basis</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Retention</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ropaRecords.map((record) => (
-                      <tr key={record.id} className="bg-slate-50 transition hover:bg-slate-100">
-                        <td className="rounded-l-2xl px-4 py-4 text-sm font-medium">{record.id}</td>
-                        <td className="px-4 py-4 text-sm">{record.purpose}</td>
-                        <td className="px-4 py-4 text-sm text-slate-500">{record.legal_basis}</td>
-                        <td className="px-4 py-4 text-sm">
-                          {/* แก้ไข: ใส่ backtick ใน className */}
-                          <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                            record.status === 'active' 
-                            ? 'bg-emerald-100 text-emerald-800' 
-                            : 'bg-rose-100 text-rose-800'
-                          }`}>
-                            {record.status.toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="rounded-r-2xl px-4 py-4 text-sm">{record.retention_period} วัน</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-blue-100 mb-2">
+                รหัสผ่าน
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-white placeholder-blue-300/50 backdrop-blur-sm transition-all focus:border-blue-400 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                placeholder="กรอกรหัสผ่าน"
+                disabled={isLoading}
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                <p className="text-sm text-red-300">{error}</p>
               </div>
             )}
-          </div>
 
-          {showFilterModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-              <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-                <div className="mb-5 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900">กรองข้อมูล ROPA</h3>
-                    <p className="text-sm text-slate-500">เลือกตัวกรองแล้วกดยืนยันเพื่อดูผล</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowFilterModal(false)}
-                    className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200"
-                  >
-                    ✕
-                  </button>
-                </div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  กำลังเข้าสู่ระบบ...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                  </svg>
+                  เข้าสู่ระบบ
+                </>
+              )}
+            </button>
+          </form>
+        </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">ฐานทางกฎหมาย</label>
-                    <select
-                      name="legal_basis"
-                      value={filterValues.legal_basis}
-                      onChange={handleFilterChange}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
-                    >
-                      <option value="">ทั้งหมด</option>
-                      <option value="consent">Consent</option>
-                      <option value="not_consent">Not Consent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">สถานะ</label>
-                    <select
-                      name="status"
-                      value={filterValues.status}
-                      onChange={handleFilterChange}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
-                    >
-                      <option value="">ทั้งหมด</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">เวลาเก็บรักษา (ปี)</label>
-                    <input
-                      type="number"
-                      name="retention_period"
-                      value={filterValues.retention_period}
-                      onChange={handleFilterChange}
-                      min={1}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
-                      placeholder="เช่น 1"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={handleClearFilter}
-                    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    ล้างตัวกรอง
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleApplyFilter}
-                    className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    กรองข้อมูล
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </section>
+        {/* Version info */}
+        <p className="mt-6 text-center text-xs text-blue-200/40">
+          RoPA Master v1.0 - ระบบจัดการข้อมูลการประมวลผลส่วนบุคคล โดย P. TAO
+        </p>
       </div>
-    </div>
-  );
-}
-
-// ── Components ย่อยเพื่อความสะอาดของโค้ด ──
-
-function StatCard({ title, value, desc, color = "text-slate-900" }: any) {
-  return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">{title}</p>
-      <p className={`mt-4 text-3xl font-semibold ${color}`}>{value}</p>
-      <p className="mt-2 text-sm text-slate-600">{desc}</p>
     </div>
   );
 }
