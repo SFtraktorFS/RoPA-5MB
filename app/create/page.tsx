@@ -69,7 +69,7 @@ export default function CreatePage() {
             <p className="mt-2 text-sm text-gray-600">ระบุรายละเอียดกิจกรรมเก็บรวบรวม ใช้ หรือเปิดเผยข้อมูลส่วนบุคคล</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 text-gray-700">
             
             {/* 1. Purpose - ชื่อกิจกรรม (text input) */}
             <div>
