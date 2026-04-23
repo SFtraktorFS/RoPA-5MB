@@ -49,7 +49,7 @@ export default function CreatePage() {
       const data = await response.json();
       if (response.ok && data.status === 'success') {
         setMessage('✅ บันทึกกิจกรรมเรียบร้อยแล้ว');
-        setTimeout(() => router.push('/'), 2000);
+        setTimeout(() => router.push('/ropa'), 2000);
       } else {
         setMessage(data.message || '❌ เกิดข้อผิดพลาดขณะบันทึกข้อมูล');
       }

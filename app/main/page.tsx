@@ -92,7 +92,7 @@ export default function Home() {
           </button>
         </div>
         <div className="px-6 py-6 space-y-3">
-          <a href="/" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
+          <a href="/main" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
             หน้าแรก
           </a>
           <a href="/create" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">

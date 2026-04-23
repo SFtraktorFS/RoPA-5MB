@@ -112,18 +112,11 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-blue-300/60">
-              ร付け毛细管
-            </p>
-          </div>
         </div>
 
         {/* Version info */}
         <p className="mt-6 text-center text-xs text-blue-200/40">
-          RoPA Master v1.0.0
+          RoPA Master v1.0 - ระบบจัดการข้อมูลการประมวลผลส่วนบุคคล โดย P. TAO
         </p>
       </div>
     </div>
