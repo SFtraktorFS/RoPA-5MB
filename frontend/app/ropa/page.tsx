@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 
 interface ROPA {
   id: number;
@@ -36,13 +38,18 @@ export default function RecordsPage() {
     retention_period: '',
   });
 
+  const { user, token } = useAuth();
+  const router = useRouter();
+
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3340';
 
   useEffect(() => {
-    fetchRecords();
-  }, []);
+    if (token) {
+      fetchRecords();
+    }
+  }, [token]);
 
-   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilterValues((prev) => ({
       ...prev,
@@ -60,7 +67,11 @@ export default function RecordsPage() {
       if (filterValues.status) params.append('status', filterValues.status);
       if (filterValues.retention_period) params.append('retention_period', filterValues.retention_period);
 
-      const response = await fetch(`${API_BASE}/ropa/filter?${params.toString()}`);
+      const response = await fetch(`${API_BASE}/ropa/filter?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       if (data.status === 'success') {
         setRecords(data.data);
@@ -78,9 +89,14 @@ export default function RecordsPage() {
   };
 
   const fetchRecords = async () => {
+    if (!token) return;
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/ropa`);
+      const response = await fetch(`${API_BASE}/ropa`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       if (data.status === 'success') {
         setRecords(data.data);
@@ -93,18 +109,20 @@ export default function RecordsPage() {
   };
 
   const handleDeleteRecord = async (recordId: number) => {
+    if (user?.role === 'DPO') return;
     const confirmed = window.confirm('ยืนยันการลบบันทึกนี้? การลบจะไม่สามารถกู้คืนได้');
     if (!confirmed) return;
 
     try {
       const response = await fetch(`${API_BASE}/ropa/${recordId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       const data = await response.json();
       if (data.status === 'success') {
         await fetchRecords();
-      } else {
-        console.error('Error deleting record:', data);
       }
     } catch (error) {
       console.error('Error deleting record:', error);
@@ -238,18 +256,25 @@ export default function RecordsPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm">
-                        <button
-                          onClick={() => handleDeleteRecord(record.id)}
-                          className="text-red-600 hover:text-red-700 font-semibold"
-                        >
-                          🗑️ ลบ
-                        </button>
-                        <button
-                          onClick={() => handleEditClick(record)}
-                          className="ml-3 text-blue-600 hover:text-blue-700 font-semibold"
-                        >
-                          ✏️ แก้ไข
-                        </button>
+                        {user?.role !== 'DPO' && (
+                          <>
+                            <button
+                              onClick={() => handleDeleteRecord(record.id)}
+                              className="text-red-600 hover:text-red-700 font-semibold"
+                            >
+                              🗑️ ลบ
+                            </button>
+                            <button
+                              onClick={() => handleEditClick(record)}
+                              className="ml-3 text-blue-600 hover:text-blue-700 font-semibold"
+                            >
+                              ✏️ แก้ไข
+                            </button>
+                          </>
+                        )}
+                        {user?.role === 'DPO' && (
+                          <span className="text-slate-400 italic text-xs">View Only</span>
+                        )}
                       </td>
                     </tr>
                   ))}

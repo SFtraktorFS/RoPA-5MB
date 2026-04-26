@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 
 interface CreateFormData {
   purpose: string;
@@ -13,6 +14,7 @@ interface CreateFormData {
 
 export default function CreatePage() {
   const router = useRouter();
+  const { user, token } = useAuth();
   const [formData, setFormData] = useState<CreateFormData>({
     purpose: '',
     data_subject: 'พนักงาน',
@@ -26,6 +28,31 @@ export default function CreatePage() {
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3340';
 
+  if (!user) return null;
+
+  // Role Protection: DPO cannot create records
+  if (user.role === 'DPO') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
+        <div className="max-w-md w-full text-center space-y-6 p-10 rounded-[2.5rem] bg-white shadow-xl border border-slate-100">
+          <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
+            <svg className="w-10 h-10 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900">คุณไม่มีสิทธิ์สร้างบันทึก</h2>
+          <p className="text-slate-600">เฉพาะ Admin และ Data Owner เท่านั้นที่สามารถเพิ่มบันทึก RoPA ใหม่ได้</p>
+          <button 
+            onClick={() => router.push('/main')}
+            className="w-full py-3 bg-slate-900 text-white rounded-2xl font-semibold hover:bg-slate-800 transition-colors"
+          >
+            กลับหน้าหลัก
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -36,13 +63,17 @@ export default function CreatePage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!token) return;
     setSubmitting(true);
     setMessage(null);
 
     try {
       const response = await fetch(`${API_BASE}/ropa`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ ...formData, status: 'active' }),
       });
 

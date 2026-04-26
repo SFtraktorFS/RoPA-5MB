@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./context/AuthContext";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -9,6 +10,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,14 +44,10 @@ export default function LoginPage() {
       }
 
       // Store auth data
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("user", JSON.stringify({
+      login(data.access_token, {
         username: data.username,
         role: data.role
-      }));
-
-      // Redirect based on role or to a general main page
-      router.push("/main");
+      });
     } catch (err: any) {
       setError(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
     } finally {
