@@ -97,6 +97,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {
         "access_token": access_token, 
         "token_type": "bearer",
+        "id": user.id,
         "username": user.username,
         "role": user.role
     }
@@ -181,6 +182,51 @@ async def update_ropa_record(
     if not updated_record:
         raise HTTPException(status_code=404, detail="ROPA record not found")
     return {"status": "success", "message": "ROPA record updated", "data": updated_record}
+
+# User Management Routes (Admin only)
+@app.get("/users")
+async def read_users(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role(["Admin"]))
+):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    return {"status": "success", "data": users}
+
+@app.post("/users")
+async def create_user(
+    user_data: schemas.UserCreate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role(["Admin"]))
+):
+    if crud.get_user_by_username(db, user_data.username):
+        raise HTTPException(status_code=400, detail="Username already registered")
+    new_user = crud.create_user(db=db, user=user_data)
+    return {"status": "success", "message": "User created", "data": new_user}
+
+@app.put("/users/{user_id}")
+async def update_user(
+    user_id: int, 
+    user_data: schemas.UserUpdate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role(["Admin"]))
+):
+    updated_user = crud.update_user(db=db, user_id=user_id, user=user_data)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"status": "success", "message": "User updated", "data": updated_user}
+
+@app.delete("/users/{user_id}")
+async def delete_user(
+    user_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role(["Admin"]))
+):
+    deleted_user = crud.delete_user(db=db, user_id=user_id)
+    if not deleted_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"status": "success", "message": "User deleted", "data": {"id": user_id}}
 
 
 

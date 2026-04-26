@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 
 interface User {
+  id: number;
   username: string;
   role: 'Admin' | 'DPO' | 'Data Owner';
 }

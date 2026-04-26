@@ -45,6 +45,7 @@ export default function LoginPage() {
 
       // Store auth data
       login(data.access_token, {
+        id: data.id,
         username: data.username,
         role: data.role
       });

@@ -94,6 +94,9 @@ def delete_ropa(db: Session, ropa_id: int):
     return db_ropa
 
 # User CRUD
+def get_users(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.User).offset(skip).limit(limit).all()
+
 def get_user_by_username(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
@@ -107,4 +110,27 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    return db_user
+
+def update_user(db: Session, user_id: int, user: schemas.UserUpdate):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user:
+        if user.username is not None:
+            db_user.username = user.username
+        if user.role is not None:
+            db_user.role = user.role
+        if user.is_active is not None:
+            db_user.is_active = 1 if user.is_active else 0
+        if user.password is not None:
+            from app.auth import get_password_hash
+            db_user.hashed_password = get_password_hash(user.password)
+        db.commit()
+        db.refresh(db_user)
+    return db_user
+
+def delete_user(db: Session, user_id: int):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user:
+        db.delete(db_user)
+        db.commit()
     return db_user

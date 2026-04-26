@@ -31,6 +31,12 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    role: Optional[str] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = None
+
 class User(UserBase):
     id: int
     is_active: bool
@@ -41,6 +47,7 @@ class User(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    id: int
     username: str
     role: str
 
