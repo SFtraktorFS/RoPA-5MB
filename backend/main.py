@@ -183,6 +183,18 @@ async def update_ropa_record(
         raise HTTPException(status_code=404, detail="ROPA record not found")
     return {"status": "success", "message": "ROPA record updated", "data": updated_record}
 
+@app.post("/ropa/{ropa_id}/approve")
+async def approve_ropa_record(
+    ropa_id: int, 
+    approval_data: schemas.ROPAApprove, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(check_role(["Admin", "DPO"]))
+):
+    updated_record = crud.approve_ropa(db=db, ropa_id=ropa_id, approval=approval_data)
+    if not updated_record:
+        raise HTTPException(status_code=404, detail="ROPA record not found")
+    return {"status": "success", "message": f"ROPA record {approval_data.status}", "data": updated_record}
+
 # User Management Routes (Admin only)
 @app.get("/users")
 async def read_users(

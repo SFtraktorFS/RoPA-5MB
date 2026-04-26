@@ -74,7 +74,7 @@ export default function CreatePage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ...formData, status: 'active' }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();

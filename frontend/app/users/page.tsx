@@ -169,6 +169,12 @@ export default function UserManagementPage() {
           {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
+              <Link href="/main" className="mb-4 inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                กลับหน้าหลัก
+              </Link>
               <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">จัดการบัญชีผู้ใช้</h1>
               <p className="text-slate-500 mt-1">จัดการข้อมูลและสิทธิ์การเข้าถึงระบบของผู้ใช้งาน</p>
             </div>

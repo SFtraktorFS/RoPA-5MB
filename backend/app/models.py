@@ -11,7 +11,8 @@ class ROPA(Base):
     data_category = Column(String)
     legal_basis = Column(String, index=True)  # "consent" or "not_consent"
     retention_period = Column(Integer, index=True)
-    status = Column(String, index=True, default="active")  # "active" or "inactive"
+    status = Column(String, index=True, default="pending")  # "pending", "active", "inactive"
+    reason = Column(String, nullable=True)
     expiration_date = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 

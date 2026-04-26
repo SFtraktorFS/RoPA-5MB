@@ -7,21 +7,22 @@ class ROPAForm(BaseModel):
     purpose: str
     data_subject: str
     data_category: str
-
-    # "consent" , "not_consent"
     legal_basis: str 
-    # "active" , "inactive"
-
     retention_period: int
-    status: str = "active"  
+    status: str = "pending"  
+    reason: Optional[str] = None
 
 class ROPA(ROPAForm):
     id: int
     expiration_date: Optional[str]
-    created_at: str
+    created_at: datetime
     
     class Config:
         from_attributes = True
+
+class ROPAApprove(BaseModel):
+    status: str # "active" or "inactive"
+    reason: str
 
 # User Schemas
 class UserBase(BaseModel):

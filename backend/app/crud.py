@@ -41,7 +41,8 @@ def create_ropa(db: Session, ropa: schemas.ROPAForm):
         data_category=ropa.data_category,
         legal_basis=ropa.legal_basis,
         retention_period=ropa.retention_period,
-        status=ropa.status,
+        status="pending",
+        reason=ropa.reason,
         expiration_date=expiration_date,
         created_at=created_at
     )
@@ -82,6 +83,15 @@ def update_ropa(db: Session, ropa_id: int, ropa: schemas.ROPAForm):
         # Recalculate expiration_date if retention_period was updated
         if db_ropa.created_at:
             db_ropa.expiration_date = calculate_expiration_date(db_ropa.created_at, db_ropa.retention_period)
+        db.commit()
+        db.refresh(db_ropa)
+    return db_ropa
+
+def approve_ropa(db: Session, ropa_id: int, approval: schemas.ROPAApprove):
+    db_ropa = db.query(models.ROPA).filter(models.ROPA.id == ropa_id).first()
+    if db_ropa:
+        db_ropa.status = approval.status
+        db_ropa.reason = approval.reason
         db.commit()
         db.refresh(db_ropa)
     return db_ropa
