@@ -288,8 +288,11 @@ export default function RecordsPage() {
                     {records.map((record) => (
                       <tr 
                         key={record.id} 
-                        onClick={() => handleViewClick(record)}
-                        className="hover:bg-blue-50/50 cursor-pointer transition-colors"
+                        onClick={() => {
+                          if (record.status === 'inactive' && user?.role === 'Data Owner') return;
+                          handleViewClick(record);
+                        }}
+                        className={`${record.status === 'inactive' && user?.role === 'Data Owner' ? 'opacity-60 cursor-not-allowed' : 'hover:bg-blue-50/50 cursor-pointer'} transition-colors`}
                       >
                         <td className="px-6 py-4 text-sm font-medium text-slate-900">{record.purpose}</td>
                         <td className="px-6 py-4 text-sm text-slate-600">{record.data_category}</td>
@@ -307,7 +310,7 @@ export default function RecordsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm space-x-3">
-                          {user?.role !== 'DPO' && (
+                          {user?.role !== 'DPO' && record.status !== 'inactive' && (
                             <>
                               <button
                                 onClick={(e) => {
@@ -351,6 +354,19 @@ export default function RecordsPage() {
                               className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
                             >
                               🛑 หยุด/ยกเลิก
+                            </button>
+                          )}
+                          {(user?.role === 'DPO' || user?.role === 'Admin') && record.status === 'inactive' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedRecord(record);
+                                setApprovalForm({ status: 'active', reason: '' });
+                                setShowApproveModal(true);
+                              }}
+                              className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+                            >
+                              🔓 เปิดใช้งานใหม่
                             </button>
                           )}
                         </td>
@@ -546,6 +562,19 @@ export default function RecordsPage() {
                     ดำเนินการตรวจสอบ
                   </button>
                 )}
+                {(user?.role === 'DPO' || user?.role === 'Admin') && selectedRecord.status === 'inactive' && (
+                  <button
+                    onClick={() => {
+                      setShowViewModal(false);
+                      setSelectedRecord(selectedRecord);
+                      setApprovalForm({ status: 'active', reason: '' });
+                      setShowApproveModal(true);
+                    }}
+                    className="rounded-xl bg-green-600 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-green-700"
+                  >
+                    🔓 เปิดใช้งานใหม่
+                  </button>
+                )}
                 <button
                   onClick={() => setShowViewModal(false)}
                   className="rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
@@ -560,7 +589,10 @@ export default function RecordsPage() {
         {showApproveModal && selectedRecord && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4 py-6">
             <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl text-gray-700">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">ดำเนินการตรวจสอบ RoPA</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-6">
+                {selectedRecord.status === 'inactive' ? 'เปิดใช้งาน RoPA อีกครั้ง' : 
+                 approvalForm.status === 'inactive' ? 'ระงับการใช้งาน RoPA' : 'ดำเนินการตรวจสอบ RoPA'}
+              </h3>
               
               <div className="space-y-6">
                 <div>

@@ -33,17 +33,19 @@ export default function UserManagementPage() {
     is_active: true,
   });
 
-  const { user, token } = useAuth();
+  const { user, token, isLoading } = useAuth();
   const router = useRouter();
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3340';
 
   useEffect(() => {
+    if (isLoading) return;
+    
     if (!user || user.role !== 'Admin') {
       router.push('/dashboard');
       return;
     }
     fetchUsers();
-  }, [user, token]);
+  }, [user, token, isLoading]);
 
   const fetchUsers = async () => {
     if (!token) return;
