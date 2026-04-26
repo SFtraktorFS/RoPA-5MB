@@ -15,20 +15,46 @@ export default function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // Simple validation check - in production, verify with backend
     if (!username.trim() || !password.trim()) {
       setError("กรุณากรอกชื่อผู้ใช้และรหัสผ่าน");
       setIsLoading(false);
       return;
     }
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      // OAuth2PasswordRequestForm expects x-www-form-urlencoded
+      const formData = new URLSearchParams();
+      formData.append("username", username);
+      formData.append("password", password);
 
-    // For demo purposes: any non-empty credentials work
-    // In production, this would call an authentication API
-    setIsLoading(false);
-    router.push("/main");
+      const response = await fetch("http://localhost:3340/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      }
+
+      // Store auth data
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user", JSON.stringify({
+        username: data.username,
+        role: data.role
+      }));
+
+      // Redirect based on role or to a general main page
+      router.push("/main");
+    } catch (err: any) {
+      setError(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

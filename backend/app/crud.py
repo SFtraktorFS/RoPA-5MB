@@ -92,3 +92,19 @@ def delete_ropa(db: Session, ropa_id: int):
         db.delete(db_ropa)
         db.commit()
     return db_ropa
+
+# User CRUD
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
+
+def create_user(db: Session, user: schemas.UserCreate):
+    from app.auth import get_password_hash
+    db_user = models.User(
+        username=user.username,
+        hashed_password=get_password_hash(user.password),
+        role=user.role
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user

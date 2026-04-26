@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface ROPA {
   id: number;
@@ -28,6 +29,8 @@ export default function Home() {
     status: '',
   });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [user, setUser] = useState<{username: string, role: string} | null>(null);
+  const router = useRouter();
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:3340";
 
@@ -35,10 +38,22 @@ export default function Home() {
   const fetchRopaRecords = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${API_BASE}/ropa`); // แก้ไข: ใส่ backtick
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/");
+        return;
+      }
+
+      const response = await fetch(`${API_BASE}/ropa`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       if (data.status === "success") {
         setRopaRecords(data.data);
+      } else if (response.status === 401) {
+        router.push("/");
       }
     } catch (error) {
       console.error("Error fetching ROPA records:", error);
@@ -48,8 +63,23 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+    
+    if (!storedUser || !token) {
+      router.push("/");
+      return;
+    }
+    
+    setUser(JSON.parse(storedUser));
     fetchRopaRecords();
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/");
+  };
 
   // คำนวณค่าต่างๆ (Derived State)
   const activeCount = ropaRecords.filter((r) => r.status === "active").length;
@@ -92,6 +122,14 @@ export default function Home() {
           </button>
         </div>
         <div className="px-6 py-6 space-y-3">
+          <div className="mb-6 p-4 rounded-3xl bg-blue-50 border border-blue-100">
+            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">Logged in as</p>
+            <p className="text-lg font-bold text-slate-900">{user?.username}</p>
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-2">
+              {user?.role}
+            </div>
+          </div>
+          
           <a href="/main" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
             หน้าแรก
           </a>
@@ -104,6 +142,16 @@ export default function Home() {
           <a href="/dashboard" className="block rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-900 transition hover:bg-slate-100">
             ดู Dashboard
           </a>
+
+          <button 
+            onClick={handleLogout}
+            className="w-full mt-6 flex items-center justify-center gap-2 rounded-3xl bg-red-50 px-4 py-4 text-sm font-semibold text-red-600 transition hover:bg-red-100 border border-red-100"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            ออกจากระบบ
+          </button>
         </div>
       </aside>
 
