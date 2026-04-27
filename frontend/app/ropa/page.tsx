@@ -256,9 +256,11 @@ export default function RecordsPage() {
             >
               Export CSV
             </button>
-            <Link href="/create" className="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
-              + เพิ่มข้อมูลใหม่
-            </Link>
+            {user?.role !== 'DPO' && (
+              <Link href="/create" className="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                + เพิ่มข้อมูลใหม่
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setShowFilterModal(true)}
