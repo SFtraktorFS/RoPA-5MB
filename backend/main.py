@@ -164,7 +164,7 @@ async def filter_ropa_records(
 async def delete_ropa_record(
     ropa_id: int, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(check_role(["Admin", "Data Owner"]))
+    current_user: models.User = Depends(check_role(["Admin"]))
 ):
     deleted_record = crud.delete_ropa(db=db, ropa_id=ropa_id)
     if not deleted_record:
@@ -176,7 +176,7 @@ async def update_ropa_record(
     ropa_id: int, 
     form_data: schemas.ROPAForm, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(check_role(["Admin", "DPO", "Data Owner"]))
+    current_user: models.User = Depends(check_role(["Admin", "DPO"]))
 ):
     updated_record = crud.update_ropa(db=db, ropa_id=ropa_id, ropa=form_data)
     if not updated_record:
