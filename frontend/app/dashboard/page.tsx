@@ -232,14 +232,12 @@ export default function Dashboard() {
             </div>
             <h2 className="text-2xl font-bold text-slate-900">ยังไม่มีข้อมูลสำหรับดู</h2>
             <p className="mt-2 text-slate-600 max-w-md">เพิ่มข้อมูล ROPA ก่อนเพื่อดูสถิติและการวิเคราะห์</p>
-            {user?.role !== 'DPO' && (
-              <a
-                href="/create"
-                className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:-translate-y-0.5"
-              >
-                เพิ่มข้อมูล ROPA
-              </a>
-            )}
+            <a
+              href="/create"
+              className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:shadow-xl hover:-translate-y-0.5"
+            >
+              เพิ่มข้อมูล ROPA
+            </a>
           </div>
         )}
          
