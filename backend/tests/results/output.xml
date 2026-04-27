@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.2 (Python 3.10.20 on linux)" generated="2026-04-27T14:47:53.582765" rpa="false" schemaversion="5">
+<suite id="s1" name="Tests" source="/tests">
+<suite id="s1-s1" name="Api Tests" source="/tests/api_tests.robot">
+<kw name="Login To API" type="SETUP">
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-04-27T14:47:53.743691" level="INFO">Creating Session using : alias=api_session, url=http://api-server:8000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>api_session</arg>
+<arg>${BASE_URL}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-04-27T14:47:53.743419" elapsed="0.000547"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-04-27T14:47:53.744698" level="INFO">${data} = {'username': 'admin', 'password': '123456'}</msg>
+<var>${data}</var>
+<arg>username=admin</arg>
+<arg>password=123456</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-04-27T14:47:53.744114" elapsed="0.000611"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-04-27T14:47:53.748673" level="WARN">Retrying (RetryAdapter(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='api-server', port=8000): Failed to establish a new connection: [Errno 111] Connection refused")': /login</msg>
+<msg time="2026-04-27T14:47:53.949990" level="WARN">Retrying (RetryAdapter(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='api-server', port=8000): Failed to establish a new connection: [Errno 111] Connection refused")': /login</msg>
+<msg time="2026-04-27T14:47:54.351612" level="WARN">Retrying (RetryAdapter(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='api-server', port=8000): Failed to establish a new connection: [Errno 111] Connection refused")': /login</msg>
+<msg time="2026-04-27T14:47:54.545212" level="INFO">POST Request : url=http://api-server:8000/login 
+ path_url=/login 
+ headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Content-Length': '30', 'Content-Type': 'application/x-www-form-urlencoded'} 
+ body=username=admin&amp;password=123456 
+ </msg>
+<msg time="2026-04-27T14:47:54.545301" level="INFO">POST Response : url=http://api-server:8000/login 
+ status=200, reason=OK 
+ headers={'date': 'Mon, 27 Apr 2026 14:47:53 GMT', 'server': 'uvicorn', 'content-length': '226', 'content-type': 'application/json'} 
+ body={"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzM4NzY3NH0.ad5lQzgL2caKE8WjeOK3wR9Ls19T73FIPztockWqmdo","token_type":"bearer","id":1,"username":"admin","role":"Admin"} 
+ </msg>
+<msg time="2026-04-27T14:47:54.545537" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/login</arg>
+<arg>data=${data}</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-04-27T14:47:53.744881" elapsed="0.800684"/>
+</kw>
+<kw name="Status Should Be" owner="RequestsLibrary">
+<arg>200</arg>
+<arg>${response}</arg>
+<doc>Fails if response status code is different than the expected.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.545731" elapsed="0.000249"/>
+</kw>
+<kw name="Get From Dictionary" owner="Collections">
+<msg time="2026-04-27T14:47:54.546486" level="INFO">${token} = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzM4NzY3NH0.ad5lQzgL2caKE8WjeOK3wR9Ls19T73FIPztockWqmdo</msg>
+<var>${token}</var>
+<arg>${response.json()}</arg>
+<arg>access_token</arg>
+<doc>Returns a value from the given ``dictionary`` based on the given ``key``.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.546063" elapsed="0.000447"/>
+</kw>
+<kw name="Set Suite Variable" owner="BuiltIn">
+<msg time="2026-04-27T14:47:54.546927" level="INFO">${ACCESS_TOKEN} = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzM4NzY3NH0.ad5lQzgL2caKE8WjeOK3wR9Ls19T73FIPztockWqmdo</msg>
+<arg>${ACCESS_TOKEN}</arg>
+<arg>${token}</arg>
+<doc>Makes a variable available everywhere within the scope of the current suite.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.546596" elapsed="0.000367"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>\nLogin Success! Access Token: ${ACCESS_TOKEN}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.547036" elapsed="0.000268"/>
+</kw>
+<doc>ทดสอบการเข้าสู่ระบบและบันทึก access token</doc>
+<status status="PASS" start="2026-04-27T14:47:53.742683" elapsed="0.804680"/>
+</kw>
+<test id="s1-s1-t1" name="Verify Get All ROPA Records Successfully" line="24">
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-04-27T14:47:54.548457" level="INFO">Creating Session using : alias=api_session, url=http://api-server:8000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>api_session</arg>
+<arg>${BASE_URL}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-04-27T14:47:54.548240" elapsed="0.000366"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-04-27T14:47:54.549033" level="INFO">${headers} = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzM4NzY3NH0.ad5lQzgL2caKE8WjeOK3wR9Ls19T73FIPztockWqmdo'}</msg>
+<var>${headers}</var>
+<arg>Authorization=Bearer ${ACCESS_TOKEN}</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.548702" elapsed="0.000352"/>
+</kw>
+<kw name="GET On Session" owner="RequestsLibrary">
+<msg time="2026-04-27T14:47:54.561013" level="INFO">GET Request : url=http://api-server:8000/ropa 
+ path_url=/ropa 
+ headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzM4NzY3NH0.ad5lQzgL2caKE8WjeOK3wR9Ls19T73FIPztockWqmdo'} 
+ body=None 
+ </msg>
+<msg time="2026-04-27T14:47:54.561091" level="INFO">GET Response : url=http://api-server:8000/ropa 
+ status=200, reason=OK 
+ headers={'date': 'Mon, 27 Apr 2026 14:47:53 GMT', 'server': 'uvicorn', 'content-length': '1180', 'content-type': 'application/json'} 
+ body={"status":"success","data":[{"purpose":"การสมัครสมาชิกเว็บไซต์","id":6,"data_category":"ชื่อ-นามสกุล, อีเมล, เบอร์โทรศัพท์","retention_period":1,"reason":null,"created_at":"2026-04-23T05:17:37.572091","data_subject":"พนักงาน","legal_basis":"consent","status":"active","expiration_date":"2027-04-23T05:17:37.572091"},{"purpose":"การสั่งซื้อสินค้าออนไลน์","id":7,"data_category":"ชื่อ-นามสกุล, ที่อยู่จัดส่ง, เบอร์โทร","retention_period":3,"reason":null,"created_at":"2026-04-23T05:18:41.915845","data_subject":"ลูกค้า","legal_basis":"consent","status":"active","expiration_date":"2029-04-23T05:18:41.915845"},{"purpose":"การสมัครสมาชิกเว็บไซต์","id":9,"data_category":"teeeกก","retention_period":1,"reason":"good record","created_at":"2026-04-26T20:39:54.754211","data_subject":"พนักงาน","legal_basis":"consent","status":"active","expiration_date":"2027-04-26T20:39:54.754211"}]} 
+ </msg>
+<msg time="2026-04-27T14:47:54.561228" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/ropa</arg>
+<arg>headers=${headers}</arg>
+<doc>Sends a GET request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.549135" elapsed="0.012399"/>
+</kw>
+<kw name="Status Should Be" owner="RequestsLibrary">
+<arg>200</arg>
+<arg>${response}</arg>
+<doc>Fails if response status code is different than the expected.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.561701" elapsed="0.000205"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>\nResponse Data: ${response.json()}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.561983" elapsed="0.000547"/>
+</kw>
+<doc>ทดสอบการดึงข้อมูลบันทึกการประมวลผลข้อมูล (ROPA) ทั้งหมด</doc>
+<status status="PASS" start="2026-04-27T14:47:54.547431" elapsed="0.015201"/>
+</test>
+<test id="s1-s1-t2" name="Verify Create New ROPA Record" line="32">
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-04-27T14:47:54.564092" level="INFO">${payload} = {'purpose': 'Data Processing for Analysis', 'data_subject': 'Customer', 'data_category': 'Personal Information', 'legal_basis': 'consent', 'retention_period': '3', 'status': 'pending', 'reason': 'Test...</msg>
+<var>${payload}</var>
+<arg>purpose=Data Processing for Analysis</arg>
+<arg>data_subject=Customer</arg>
+<arg>data_category=Personal Information</arg>
+<arg>legal_basis=consent</arg>
+<arg>retention_period=3</arg>
+<arg>status=pending</arg>
+<arg>reason=Test Reason</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.563558" elapsed="0.000571"/>
+</kw>
+<kw name="Create Dictionary" owner="BuiltIn">
+<msg time="2026-04-27T14:47:54.564735" level="INFO">${headers} = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzM4NzY3NH0.ad5lQzgL2caKE8WjeOK3wR9Ls19T73FIPztockWqmdo', 'Content-Type': 'applicatio...</msg>
+<var>${headers}</var>
+<arg>Authorization=Bearer ${ACCESS_TOKEN}</arg>
+<arg>Content-Type=application/json</arg>
+<doc>Creates and returns a dictionary based on the given ``items``.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.564287" elapsed="0.000482"/>
+</kw>
+<kw name="Create Session" owner="RequestsLibrary">
+<msg time="2026-04-27T14:47:54.565065" level="INFO">Creating Session using : alias=api_session, url=http://api-server:8000, headers={},                     cookies={}, auth=None, timeout=None, proxies=None, verify=False,                     debug=0 </msg>
+<arg>api_session</arg>
+<arg>${BASE_URL}</arg>
+<doc>Create Session: create a HTTP session to a server</doc>
+<status status="PASS" start="2026-04-27T14:47:54.564902" elapsed="0.000424"/>
+</kw>
+<kw name="POST On Session" owner="RequestsLibrary">
+<msg time="2026-04-27T14:47:54.591224" level="INFO">POST Request : url=http://api-server:8000/ropa 
+ path_url=/ropa 
+ headers={'User-Agent': 'python-requests/2.33.1', 'Accept-Encoding': 'gzip, deflate', 'Accept': '*/*', 'Connection': 'keep-alive', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBZG1pbiIsImV4cCI6MTc3NzM4NzY3NH0.ad5lQzgL2caKE8WjeOK3wR9Ls19T73FIPztockWqmdo', 'Content-Type': 'application/json', 'Content-Length': '209'} 
+ body=b'{"purpose": "Data Processing for Analysis", "data_subject": "Customer", "data_category": "Personal Information", "legal_basis": "consent", "retention_period": "3", "status": "pending", "reason": "Test Reason"}' 
+ </msg>
+<msg time="2026-04-27T14:47:54.591362" level="INFO">POST Response : url=http://api-server:8000/ropa 
+ status=200, reason=OK 
+ headers={'date': 'Mon, 27 Apr 2026 14:47:53 GMT', 'server': 'uvicorn', 'content-length': '351', 'content-type': 'application/json'} 
+ body={"status":"success","message":"ROPA record created","data":{"purpose":"Data Processing for Analysis","id":10,"data_category":"Personal Information","retention_period":3,"reason":"Test Reason","created_at":"2026-04-27T14:47:54.572560","data_subject":"Customer","legal_basis":"consent","status":"pending","expiration_date":"2029-04-27T14:47:54.572560"}} 
+ </msg>
+<msg time="2026-04-27T14:47:54.591543" level="INFO">${response} = &lt;Response [200]&gt;</msg>
+<var>${response}</var>
+<arg>api_session</arg>
+<arg>/ropa</arg>
+<arg>json=${payload}</arg>
+<arg>headers=${headers}</arg>
+<doc>Sends a POST request on a previously created HTTP Session.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.565424" elapsed="0.026153"/>
+</kw>
+<kw name="Status Should Be" owner="RequestsLibrary">
+<arg>200</arg>
+<arg>${response}</arg>
+<doc>Fails if response status code is different than the expected.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.591960" elapsed="0.000289"/>
+</kw>
+<kw name="Log To Console" owner="BuiltIn">
+<arg>\nResponse Data: ${response.json()}</arg>
+<doc>Logs the given message to the console.</doc>
+<status status="PASS" start="2026-04-27T14:47:54.592399" elapsed="0.000899"/>
+</kw>
+<doc>ทดสอบการสร้างบันทึกการประมวลผลข้อมูลใหม่ (ROPA)</doc>
+<status status="PASS" start="2026-04-27T14:47:54.562823" elapsed="0.030617"/>
+</test>
+<status status="PASS" start="2026-04-27T14:47:53.607363" elapsed="0.986891"/>
+</suite>
+<status status="PASS" start="2026-04-27T14:47:53.585361" elapsed="1.009607"/>
+</suite>
+<statistics>
+<total>
+<stat pass="2" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Tests" id="s1" pass="2" fail="0" skip="0">Tests</stat>
+<stat name="Api Tests" id="s1-s1" pass="2" fail="0" skip="0">Tests.Api Tests</stat>
+</suite>
+</statistics>
+<errors>
+<msg time="2026-04-27T14:47:53.748673" level="WARN">Retrying (RetryAdapter(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='api-server', port=8000): Failed to establish a new connection: [Errno 111] Connection refused")': /login</msg>
+<msg time="2026-04-27T14:47:53.949990" level="WARN">Retrying (RetryAdapter(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='api-server', port=8000): Failed to establish a new connection: [Errno 111] Connection refused")': /login</msg>
+<msg time="2026-04-27T14:47:54.351612" level="WARN">Retrying (RetryAdapter(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError("HTTPConnection(host='api-server', port=8000): Failed to establish a new connection: [Errno 111] Connection refused")': /login</msg>
+</errors>
+</robot>

@@ -5,3 +5,12 @@ services:
       - "3340:8000"
     volumes:
       - .:/app
+
+  robot_tester:
+    build:
+      context: ./tests
+      dockerfile: Dockerfile.robot
+    volumes:
+      - ./tests:/tests
+    depends_on:
+      - api-server
