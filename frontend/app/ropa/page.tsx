@@ -175,7 +175,7 @@ export default function RecordsPage() {
     try {
       const response = await fetch(`${API_BASE}/ropa/${selectedRecord.id}/approve`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -197,7 +197,10 @@ export default function RecordsPage() {
     try {
       const response = await fetch(`${API_BASE}/ropa/${selectedRecord.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(editForm),
       });
       const data = await response.json();
@@ -259,12 +262,12 @@ export default function RecordsPage() {
               </Link>
             )}
             <button
-                type="button"
-                onClick={() => setShowFilterModal(true)}
-                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
-              >
-                🔍 กรองข้อมูล
-              </button>
+              type="button"
+              onClick={() => setShowFilterModal(true)}
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50"
+            >
+              🔍 กรองข้อมูล
+            </button>
           </div>
         </div>
 
@@ -287,93 +290,92 @@ export default function RecordsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                    {records.map((record) => (
-                      <tr 
-                        key={record.id} 
-                        onClick={() => {
-                          if (record.status === 'inactive' && user?.role === 'Data Owner') return;
-                          handleViewClick(record);
-                        }}
-                        className={`${record.status === 'inactive' && user?.role === 'Data Owner' ? 'opacity-60 cursor-not-allowed' : 'hover:bg-blue-50/50 cursor-pointer'} transition-colors`}
-                      >
-                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{record.purpose}</td>
-                        <td className="px-6 py-4 text-sm text-slate-600">{record.data_category}</td>
-                        <td className="px-6 py-4 text-sm text-slate-900 font-medium">{record.retention_period} ปี</td>
-                        <td className="px-6 py-4 text-sm text-slate-900">{record.data_subject}</td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            record.status === 'active' 
-                              ? 'bg-green-100 text-green-800' 
-                              : record.status === 'pending'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-red-100 text-red-800'
+                  {records.map((record) => (
+                    <tr
+                      key={record.id}
+                      onClick={() => {
+                        if (record.status === 'inactive' && user?.role === 'Data Owner') return;
+                        handleViewClick(record);
+                      }}
+                      className={`${record.status === 'inactive' && user?.role === 'Data Owner' ? 'opacity-60 cursor-not-allowed' : 'hover:bg-blue-50/50 cursor-pointer'} transition-colors`}
+                    >
+                      <td className="px-6 py-4 text-sm font-medium text-slate-900">{record.purpose}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600">{record.data_category}</td>
+                      <td className="px-6 py-4 text-sm text-slate-900 font-medium">{record.retention_period} ปี</td>
+                      <td className="px-6 py-4 text-sm text-slate-900">{record.data_subject}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : record.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
                           }`}>
-                            {record.status === 'active' ? 'Active' : record.status === 'pending' ? 'Pending' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm space-x-3">
-                          {user?.role !== 'DPO' && record.status !== 'inactive' && (
-                            <>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditClick(record);
-                                }}
-                                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
-                              >
-                                ✏️ แก้ไข
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteRecord(record.id);
-                                }}
-                                className="text-red-600 hover:text-red-700 font-semibold transition-colors"
-                              >
-                                🗑️ ลบ
-                              </button>
-                            </>
-                          )}
-                          {(user?.role === 'DPO' || user?.role === 'Admin') && record.status === 'pending' && (
+                          {record.status === 'active' ? 'Active' : record.status === 'pending' ? 'Pending' : 'Inactive'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm space-x-3">
+                        {user?.role !== 'DPO' && record.status !== 'inactive' && (
+                          <>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleApproveClick(record);
+                                handleEditClick(record);
                               }}
-                              className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+                              className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
                             >
-                              ✅ อนุมัติ
+                              ✏️ แก้ไข
                             </button>
-                          )}
-                          {(user?.role === 'DPO' || user?.role === 'Admin') && record.status === 'active' && (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedRecord(record);
-                                setApprovalForm({ status: 'inactive', reason: '' });
-                                setShowApproveModal(true);
+                                handleDeleteRecord(record.id);
                               }}
-                              className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
+                              className="text-red-600 hover:text-red-700 font-semibold transition-colors"
                             >
-                              🛑 หยุด/ยกเลิก
+                              🗑️ ลบ
                             </button>
-                          )}
-                          {(user?.role === 'DPO' || user?.role === 'Admin') && record.status === 'inactive' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedRecord(record);
-                                setApprovalForm({ status: 'active', reason: '' });
-                                setShowApproveModal(true);
-                              }}
-                              className="text-green-600 hover:text-green-700 font-semibold transition-colors"
-                            >
-                              🔓 เปิดใช้งานใหม่
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                          </>
+                        )}
+                        {(user?.role === 'DPO' || user?.role === 'Admin') && record.status === 'pending' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleApproveClick(record);
+                            }}
+                            className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+                          >
+                            ✅ อนุมัติ
+                          </button>
+                        )}
+                        {(user?.role === 'DPO' || user?.role === 'Admin') && record.status === 'active' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRecord(record);
+                              setApprovalForm({ status: 'inactive', reason: '' });
+                              setShowApproveModal(true);
+                            }}
+                            className="text-orange-600 hover:text-orange-700 font-semibold transition-colors"
+                          >
+                            🛑 หยุด/ยกเลิก
+                          </button>
+                        )}
+                        {(user?.role === 'DPO' || user?.role === 'Admin') && record.status === 'inactive' && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedRecord(record);
+                              setApprovalForm({ status: 'active', reason: '' });
+                              setShowApproveModal(true);
+                            }}
+                            className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+                          >
+                            🔓 เปิดใช้งานใหม่
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -505,7 +507,7 @@ export default function RecordsPage() {
                 <h3 className="text-2xl font-bold text-slate-900">รายละเอียด RoPA</h3>
                 <button onClick={() => setShowViewModal(false)} className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200">✕</button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-slate-500 uppercase">วัตถุประสงค์</p>
@@ -529,10 +531,9 @@ export default function RecordsPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-slate-500 uppercase">สถานะ</p>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${
-                    selectedRecord.status === 'active' ? 'bg-green-100 text-green-800' : 
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${selectedRecord.status === 'active' ? 'bg-green-100 text-green-800' :
                     selectedRecord.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                  }`}>
+                    }`}>
                     {selectedRecord.status.toUpperCase()}
                   </span>
                 </div>
@@ -592,22 +593,22 @@ export default function RecordsPage() {
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 px-4 py-6">
             <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-2xl text-gray-700">
               <h3 className="text-2xl font-bold text-slate-900 mb-6">
-                {selectedRecord.status === 'inactive' ? 'เปิดใช้งาน RoPA อีกครั้ง' : 
-                 approvalForm.status === 'inactive' ? 'ระงับการใช้งาน RoPA' : 'ดำเนินการตรวจสอบ RoPA'}
+                {selectedRecord.status === 'inactive' ? 'เปิดใช้งาน RoPA อีกครั้ง' :
+                  approvalForm.status === 'inactive' ? 'ระงับการใช้งาน RoPA' : 'ดำเนินการตรวจสอบ RoPA'}
               </h3>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-2">การตัดสินใจ</label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
-                      onClick={() => setApprovalForm(f => ({...f, status: 'active'}))}
+                      onClick={() => setApprovalForm(f => ({ ...f, status: 'active' }))}
                       className={`py-3 rounded-2xl border-2 transition font-bold ${approvalForm.status === 'active' ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-100 hover:border-slate-200'}`}
                     >
                       อนุมัติ (Active)
                     </button>
                     <button
-                      onClick={() => setApprovalForm(f => ({...f, status: 'inactive'}))}
+                      onClick={() => setApprovalForm(f => ({ ...f, status: 'inactive' }))}
                       className={`py-3 rounded-2xl border-2 transition font-bold ${approvalForm.status === 'inactive' ? 'border-red-600 bg-red-50 text-red-700' : 'border-slate-100 hover:border-slate-200'}`}
                     >
                       ปฏิเสธ (Inactive)
@@ -620,7 +621,7 @@ export default function RecordsPage() {
                   <textarea
                     rows={4}
                     value={approvalForm.reason}
-                    onChange={(e) => setApprovalForm(f => ({...f, reason: e.target.value}))}
+                    onChange={(e) => setApprovalForm(f => ({ ...f, reason: e.target.value }))}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
                     placeholder="ระบุเหตุผลประกอบการพิจารณา..."
                   />
@@ -647,83 +648,83 @@ export default function RecordsPage() {
         )}
 
         {showFilterModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-              <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl text-gray-600">
-                <div className="mb-5 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-xl font-semibold text-slate-900">กรองข้อมูล ROPA</h3>
-                    <p className="text-sm text-slate-500">เลือกตัวกรองแล้วกดยืนยันเพื่อดูผล</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowFilterModal(false)}
-                    className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200"
-                  >
-                    ✕
-                  </button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
+            <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl text-gray-600">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900">กรองข้อมูล ROPA</h3>
+                  <p className="text-sm text-slate-500">เลือกตัวกรองแล้วกดยืนยันเพื่อดูผล</p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowFilterModal(false)}
+                  className="rounded-full bg-slate-100 p-2 text-slate-600 hover:bg-slate-200"
+                >
+                  ✕
+                </button>
+              </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">ฐานทางกฎหมาย</label>
-                    <select
-                      name="legal_basis"
-                      value={filterValues.legal_basis}
-                      onChange={handleFilterChange}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
-                    >
-                      <option value="">ทั้งหมด</option>
-                      <option value="consent">Consent</option>
-                      <option value="not_consent">Not Consent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">สถานะ</label>
-                    <select
-                      name="status"
-                      value={filterValues.status}
-                      onChange={handleFilterChange}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
-                    >
-                      <option value="">ทั้งหมด</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="pending">Pending</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">เวลาเก็บรักษา(เช่น น้อยกว่า3ปี)</label>
-                    <input
-                      type="number"
-                      name="retention_period"
-                      value={filterValues.retention_period}
-                      onChange={handleFilterChange}
-                      min={1}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
-                      placeholder="เช่น 1"
-                    />
-                  </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">ฐานทางกฎหมาย</label>
+                  <select
+                    name="legal_basis"
+                    value={filterValues.legal_basis}
+                    onChange={handleFilterChange}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                  >
+                    <option value="">ทั้งหมด</option>
+                    <option value="consent">Consent</option>
+                    <option value="not_consent">Not Consent</option>
+                  </select>
                 </div>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={handleClearFilter}
-                    className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">สถานะ</label>
+                  <select
+                    name="status"
+                    value={filterValues.status}
+                    onChange={handleFilterChange}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
                   >
-                    ล้างตัวกรอง
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleApplyFilter}
-                    className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
-                  >
-                    กรองข้อมูล
-                  </button>
+                    <option value="">ทั้งหมด</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">เวลาเก็บรักษา(เช่น น้อยกว่า3ปี)</label>
+                  <input
+                    type="number"
+                    name="retention_period"
+                    value={filterValues.retention_period}
+                    onChange={handleFilterChange}
+                    min={1}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    placeholder="เช่น 1"
+                  />
                 </div>
               </div>
+
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={handleClearFilter}
+                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  ล้างตัวกรอง
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApplyFilter}
+                  className="rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+                >
+                  กรองข้อมูล
+                </button>
+              </div>
             </div>
-          )}
+          </div>
+        )}
       </div>
     </div>
   );
