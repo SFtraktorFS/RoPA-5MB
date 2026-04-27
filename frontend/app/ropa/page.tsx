@@ -19,6 +19,7 @@ interface ROPA {
 }
 
 export default function RecordsPage() {
+  const [isHydrated, setIsHydrated] = useState(false);
   const [records, setRecords] = useState<ROPA[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +51,10 @@ export default function RecordsPage() {
   const router = useRouter();
 
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:3340';
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -247,7 +252,7 @@ export default function RecordsPage() {
               กลับ
             </Link>
             <h1 className="text-2xl font-bold text-slate-900">รายการบันทึกกิจกรรม (RoPA)</h1>
-          </div>
+          </div>!isHydrated || 
           <div className="flex gap-3">
             <button
               onClick={exportCSV}
