@@ -10,6 +10,15 @@ class ROPAForm(BaseModel):
     legal_basis: str 
     retention_period: int
     status: str = "pending"  
+    
+    # New PDPA Fields
+    data_controller: Optional[str] = None
+    data_processor: Optional[str] = None
+    data_sharing: Optional[str] = None
+    security_measures: Optional[str] = None
+    data_source: Optional[str] = None
+    international_transfer: Optional[str] = None
+    
     reason: Optional[str] = None
 
 class ROPA(ROPAForm):

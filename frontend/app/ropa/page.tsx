@@ -13,6 +13,12 @@ interface ROPA {
   legal_basis: string;
   retention_period: number;
   status: string;
+  data_controller?: string;
+  data_processor?: string;
+  data_sharing?: string;
+  security_measures?: string;
+  data_source?: string;
+  international_transfer?: string;
   reason?: string;
   expiration_date?: string;
   created_at: string;
@@ -39,6 +45,12 @@ export default function RecordsPage() {
     legal_basis: "",
     retention_period: 0,
     status: "",
+    data_controller: "",
+    data_processor: "",
+    data_sharing: "",
+    security_measures: "",
+    data_source: "",
+    international_transfer: "",
     reason: "",
   });
   const [filterValues, setFilterValues] = useState({
@@ -161,6 +173,12 @@ export default function RecordsPage() {
       legal_basis: record.legal_basis,
       retention_period: record.retention_period,
       status: record.status,
+      data_controller: record.data_controller || "",
+      data_processor: record.data_processor || "",
+      data_sharing: record.data_sharing || "",
+      security_measures: record.security_measures || "",
+      data_source: record.data_source || "",
+      international_transfer: record.international_transfer || "",
       reason: record.reason || "",
     });
     setShowEditModal(true);
@@ -246,6 +264,12 @@ export default function RecordsPage() {
       "Data Category",
       "Legal Basis",
       "Retention Period",
+      "Data Controller",
+      "Data Processor",
+      "Data Source",
+      "Data Sharing",
+      "Security Measures",
+      "International Transfer",
       "Status",
       "Created At",
     ];
@@ -256,6 +280,12 @@ export default function RecordsPage() {
       r.data_category,
       r.legal_basis,
       r.retention_period,
+      r.data_controller || "-",
+      r.data_processor || "-",
+      r.data_source || "-",
+      r.data_sharing || "-",
+      r.security_measures || "-",
+      r.international_transfer || "-",
       r.status,
       new Date(r.created_at).toLocaleDateString("th-TH"),
     ]);
@@ -579,6 +609,86 @@ export default function RecordsPage() {
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
                   />
                 </div>
+                
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Data Controller (ผู้ควบคุมข้อมูล)
+                    </label>
+                    <input
+                      type="text"
+                      name="data_controller"
+                      value={editForm.data_controller}
+                      onChange={handleEditChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Data Processor (ผู้ประมวลผล)
+                    </label>
+                    <input
+                      type="text"
+                      name="data_processor"
+                      value={editForm.data_processor}
+                      onChange={handleEditChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Data Source (แหล่งที่มา)
+                    </label>
+                    <input
+                      type="text"
+                      name="data_source"
+                      value={editForm.data_source}
+                      onChange={handleEditChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      International Transfer (โอนข้อมูลต่างประเทศ)
+                    </label>
+                    <input
+                      type="text"
+                      name="international_transfer"
+                      value={editForm.international_transfer}
+                      onChange={handleEditChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Data Sharing (การเปิดเผยข้อมูล)
+                  </label>
+                  <textarea
+                    name="data_sharing"
+                    value={editForm.data_sharing}
+                    onChange={handleEditChange}
+                    rows={2}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Security Measures (มาตรการรักษาความปลอดภัย)
+                  </label>
+                  <textarea
+                    name="security_measures"
+                    value={editForm.security_measures}
+                    onChange={handleEditChange}
+                    rows={2}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     เหตุผล / หมายเหตุ (Reason)
@@ -687,6 +797,54 @@ export default function RecordsPage() {
                   >
                     {selectedRecord.status.toUpperCase()}
                   </span>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-slate-500 uppercase">
+                    ผู้ควบคุมข้อมูล (Controller)
+                  </p>
+                  <p className="text-lg text-slate-900">
+                    {selectedRecord.data_controller || "-"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-slate-500 uppercase">
+                    ผู้ประมวลผล (Processor)
+                  </p>
+                  <p className="text-lg text-slate-900">
+                    {selectedRecord.data_processor || "-"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-slate-500 uppercase">
+                    แหล่งที่มา (Source)
+                  </p>
+                  <p className="text-lg text-slate-900">
+                    {selectedRecord.data_source || "-"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-slate-500 uppercase">
+                    การโอนข้อมูลต่างประเทศ
+                  </p>
+                  <p className="text-lg text-slate-900">
+                    {selectedRecord.international_transfer || "-"}
+                  </p>
+                </div>
+                <div className="md:col-span-2 space-y-1">
+                  <p className="text-sm font-semibold text-slate-500 uppercase">
+                    การเปิดเผยข้อมูล (Sharing)
+                  </p>
+                  <p className="text-lg text-slate-900">
+                    {selectedRecord.data_sharing || "-"}
+                  </p>
+                </div>
+                <div className="md:col-span-2 space-y-1">
+                  <p className="text-sm font-semibold text-slate-500 uppercase">
+                    มาตรการรักษาความปลอดภัย
+                  </p>
+                  <p className="text-lg text-slate-900">
+                    {selectedRecord.security_measures || "-"}
+                  </p>
                 </div>
                 <div className="md:col-span-2 space-y-1 pt-4 border-t">
                   <p className="text-sm font-semibold text-slate-500 uppercase">

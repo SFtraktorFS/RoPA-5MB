@@ -10,6 +10,12 @@ interface CreateFormData {
   data_category: string;
   legal_basis: "consent" | "not_consent";
   retention_period: number;
+  data_controller: string;
+  data_processor: string;
+  data_sharing: string;
+  security_measures: string;
+  data_source: string;
+  international_transfer: string;
 }
 
 export default function CreatePage() {
@@ -21,6 +27,12 @@ export default function CreatePage() {
     data_category: "",
     legal_basis: "consent",
     retention_period: 1,
+    data_controller: "",
+    data_processor: "",
+    data_sharing: "",
+    security_measures: "มีการเข้ารหัสข้อมูลและจำกัดสิทธิ์การเข้าถึง",
+    data_source: "จากเจ้าของข้อมูลโดยตรง",
+    international_transfer: "ไม่มี",
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -205,6 +217,93 @@ export default function CreatePage() {
                 min={1}
                 max={99}
                 required
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  6. ผู้ควบคุมข้อมูล (Controller)
+                </label>
+                <input
+                  type="text"
+                  name="data_controller"
+                  value={formData.data_controller}
+                  onChange={handleChange}
+                  required
+                  placeholder="ชื่อบริษัท หรือหน่วยงาน"
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  7. ผู้ประมวลผล (Processor)
+                </label>
+                <input
+                  type="text"
+                  name="data_processor"
+                  value={formData.data_processor}
+                  onChange={handleChange}
+                  placeholder="ถ้ามี"
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  8. แหล่งที่มาของข้อมูล
+                </label>
+                <input
+                  type="text"
+                  name="data_source"
+                  value={formData.data_source}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  9. การโอนข้อมูลต่างประเทศ
+                </label>
+                <input
+                  type="text"
+                  name="international_transfer"
+                  value={formData.international_transfer}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                10. การเปิดเผยข้อมูลให้บุคคลภายนอก (Sharing)
+              </label>
+              <textarea
+                name="data_sharing"
+                value={formData.data_sharing}
+                onChange={handleChange}
+                rows={2}
+                placeholder="ระบุผู้รับข้อมูล (ถ้ามี)"
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                11. มาตรการรักษาความปลอดภัย
+              </label>
+              <textarea
+                name="security_measures"
+                value={formData.security_measures}
+                onChange={handleChange}
+                required
+                rows={2}
                 className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm focus:border-blue-500 focus:bg-white outline-none transition"
               />
             </div>
