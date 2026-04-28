@@ -42,6 +42,14 @@ def create_ropa(db: Session, ropa: schemas.ROPAForm):
         legal_basis=ropa.legal_basis,
         retention_period=ropa.retention_period,
         status="pending",
+        # new ------
+        data_controller=ropa.data_controller,
+        data_processor=ropa.data_processor,
+        data_sharing=ropa.data_sharing,
+        security_measures=ropa.security_measures,
+        data_source=ropa.data_source,
+        international_transfer=ropa.international_transfer,
+        # end new ------
         reason=ropa.reason,
         expiration_date=expiration_date,
         created_at=created_at
