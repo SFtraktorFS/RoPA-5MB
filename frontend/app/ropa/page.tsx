@@ -301,7 +301,7 @@ export default function RecordsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-8 md:px-8">
-      <div className="mx-auto w-full max-w-7xl space-y-6">
+      <div className="mx-auto w-full max-w-6xl space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <Link
@@ -510,8 +510,8 @@ export default function RecordsPage() {
 
         {showEditModal && selectedRecord && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-            <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl text-gray-600">
-              <div className="mb-5 flex items-center justify-between">
+            <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl text-gray-600 custom-scrollbar">
+              <div className="sticky top-0 z-10 bg-white pb-4 mb-5 flex items-center justify-between border-b">
                 <div>
                   <h3 className="text-xl font-semibold text-slate-900">
                     แก้ไขข้อมูล ROPA
@@ -726,8 +726,8 @@ export default function RecordsPage() {
 
         {showViewModal && selectedRecord && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-            <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-2xl text-gray-700">
-              <div className="mb-6 flex items-center justify-between">
+            <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-8 shadow-2xl text-gray-700 custom-scrollbar">
+              <div className="sticky top-0 z-10 bg-white pb-4 mb-6 flex items-center justify-between border-b">
                 <h3 className="text-2xl font-bold text-slate-900">
                   รายละเอียด RoPA
                 </h3>
@@ -739,7 +739,15 @@ export default function RecordsPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-slate-500 uppercase">
+                    ID บันทึก
+                  </p>
+                  <p className="text-lg font-bold text-slate-900">
+                    #{selectedRecord.id}
+                  </p>
+                </div>
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-slate-500 uppercase">
                     วัตถุประสงค์
