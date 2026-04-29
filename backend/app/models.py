@@ -12,15 +12,14 @@ class ROPA(Base):
     legal_basis = Column(String, index=True)  # "consent" or "not_consent"
     retention_period = Column(Integer, index=True)
     status = Column(String, index=True, default="pending")  # "pending", "active", "inactive"
-    
-    # New PDPA Fields
+     # new ------
     data_controller = Column(String, nullable=True)
     data_processor = Column(String, nullable=True)
     data_sharing = Column(String, nullable=True)
     security_measures = Column(String, nullable=True)
     data_source = Column(String, nullable=True)
     international_transfer = Column(String, nullable=True)
-    
+    # end new ------
     reason = Column(String, nullable=True)
     expiration_date = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
